@@ -1,0 +1,18 @@
+{
+  "name": "random_terrain",
+  "seed": 42,
+  "nrow": 100,
+  "ncol": 100,
+  "x_half": 50.0,
+  "y_half": 50.0,
+  "height_scale": 1,
+  "base_thickness": 0.02,
+  "smooth_passes": 8,
+  "flat_radius": 0.0,
+  "flat_start_length": 2.0,
+  "flat_transition_length": 1.0,
+  "flat_start_height": 0.0,
+  "height_min_m": 0.0,
+  "height_max_m": 1.0,
+  "height_mean_m": 0.25136277079582214
+}

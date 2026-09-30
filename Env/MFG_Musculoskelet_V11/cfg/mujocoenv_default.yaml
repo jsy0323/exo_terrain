@@ -1,0 +1,383 @@
+# config.yaml
+
+
+
+# --------------------------------------
+
+# MuJoCoEnv / BaseEnv parameters
+
+# --------------------------------------
+
+model_path: Env\MFG_Musculoskelet_V11\MFG_Raj2015_V11_randomterrainexo.xml
+default_frame_skip: 20
+
+# (Optional) override XML integrator timestep (seconds)
+
+timestep: 0.001
+
+use_muscle: true
+
+clip_action: true
+
+
+
+# Visualize related
+
+load_mesh: true
+
+render_mode: "human"
+
+auto_render: true
+
+camera: 1  # (Optional) which camera to use for osffscreen rendering
+
+enable_plthist: false
+
+log_reward_breakdown: true
+
+# --------------------------------------
+
+# Shared TrajectoryManager parameters
+
+# --------------------------------------
+
+traj_manager:
+
+  data_path: "Env/MFG_Musculoskelet_V11/train/one"
+
+  sample_frequency: 100
+
+  speed_range: [1.1,1.5]
+
+  verbose: false
+
+  
+
+# --------------------------------------
+
+# High‐level reward weights
+
+# --------------------------------------
+
+reward_weights:
+
+  alive: 0.1
+
+  imitation: 0.8
+
+  terrain: 0.15
+
+  com: 0.3
+
+  upward: 0.02
+
+  grf: 0.0
+
+  smooth: -0.08 #-1
+
+  goal: 0.0
+
+
+
+# --------------------------------------
+
+# Imitation‐term sub‐weights
+
+# --------------------------------------
+
+imitation_weights:
+
+  site_pos: 0.45 #0.5
+
+  site_vel: 0.15
+
+  site_orn: 0.0 # 0.05
+
+  joint_angle: 0.35
+
+  joint_angvel: 0.35
+
+
+
+# --------------------------------------
+
+# Smoothness‐term sub‐weights
+
+# --------------------------------------
+
+smooth_weights:
+
+  energy: 0.06
+
+  synergy: 0.0 # 0.06-0.04
+
+  jerk: 0.4
+
+
+
+# --------------------------------------
+
+# Goal-term sub-weights
+
+# --------------------------------------
+
+goal_weights:
+
+  position: 0
+
+  speed: 1.0
+
+
+
+goal_reward:
+
+  position_sigma: 1.0
+
+  target_speed: null  # null uses the current reference trajectory speed
+
+  speed_sigma: 0.5
+
+  speed_direction: pelvis  # goal or pelvis
+
+
+
+# --------------------------------------
+
+# Terrain adaptation reward
+
+# --------------------------------------
+
+terrain_weights:
+
+  pelvis_height: 0.1
+
+  foot_clearance: 0.03
+
+
+
+terrain_reward:
+
+  nominal_pelvis_height: 0.90
+
+  pelvis_height_sigma: 0.12
+
+  foot_clearance_min: 0.05
+
+  foot_clearance_sigma: 0.08
+
+  foot_clearance_swing_only: true
+
+  right_foot_sites: [toes_r_sensor, calcn_r_sensor]
+
+  left_foot_sites: [toes_l_sensor, calcn_l_sensor]
+
+
+
+alive_reward:
+
+  reward: 1.0
+
+  fallen_reward: 0.0
+
+  pelvis_height_range: [0.55, 1.25]
+
+  use_terrain_relative_height: false
+
+
+
+grf_reward:
+
+  max_total_force_bw: 1.6
+
+  max_vertical_force_bw: 1.3
+
+  total_force_weight: 0.5
+
+  vertical_force_weight: 1.0
+
+
+
+com_reward:
+
+  target_forward_offset: 0.02
+
+  target_lateral_offset: 0.0
+
+  terrain_slope_sample_distance: 0.6
+
+  terrain_slope_max_abs: 0.35
+
+  uphill_forward_offset_gain: 0.4
+
+  downhill_forward_offset_gain: 0.15
+
+  terrain_slope_sigma_gain: 2.5
+
+  terrain_slope_sigma_max_scale: 1.8
+
+  position_forward_sigma: 0.45
+
+  position_lateral_sigma: 0.20
+
+  capture_forward_sigma: 0.65
+
+  capture_lateral_sigma: 0.28
+
+  lateral_velocity_sigma: 0.55
+
+  height_min: 0.70
+
+  height_sigma: 0.18
+
+  position_weight: 0.5
+
+  capture_weight: 1.2
+
+  lateral_velocity_weight: 0.5
+
+  height_weight: 0.15
+
+  right_support_sites: [toes_r_sensor, calcn_r_sensor]
+
+  left_support_sites: [toes_l_sensor, calcn_l_sensor]
+
+
+
+upward_reward:
+
+  use_sites: true
+
+  start_site: pelvis_sensor
+
+  end_site: thorax_sensor
+
+  target_dot: 0.85
+
+  sigma_dot: 0.12
+
+  min_vector_length: 0.05
+
+  body_name: thorax
+
+  body_axis: [0.0, 0.0, 1.0]
+
+
+
+# --------------------------------------
+
+# Per‐term reward coefficients
+
+# --------------------------------------
+
+#看训练结果需不需要课程学习
+
+reward_coefficients:
+
+  site_pos: 8.0 #60.0
+
+  site_vel: 0.05
+
+  site_orn: 0.0
+
+  joint_angle: 2.5
+
+  joint_angvel: 0.08
+
+# --------------------------------------
+
+# Reach‐goal parameters
+
+# --------------------------------------
+
+enable_reach_goal: false
+
+goal_switch_interval: 1.0      # seconds between goal updates
+
+
+
+# --------------------------------------
+
+# Episode
+
+# --------------------------------------
+
+max_episode_steps: 1000 #200
+
+relative_pelvis: true
+
+include_orient_angvel: false
+
+terrain_hfield_name: random_terrain
+
+terrain_floor_geom_name: floor
+
+terrain_init_clearance: 0.0
+
+pelvis_init_lift: 0.0
+
+terrain_obs_enabled: true  # train/visualize override this from policy.terrain_obs_enabled
+
+terrain_grid_shape: [20, 30]  # [lateral rows, forward columns]
+
+terrain_grid_x_range: [0.0, 3.0]  # forward distance in meters
+
+terrain_grid_y_range: [-1.0, 1.0]  # lateral distance in meters
+
+terrain_randomize_on_reset: true
+
+terrain_random_seed: null
+
+terrain_random_smooth_passes: 5
+
+terrain_flat_start_height: 0.0
+
+terrain_mode: structured  # structured or random
+
+terrain_random_height_scale: 0.5
+
+terrain_flat_start_length: 1
+
+terrain_flat_transition_length: 1
+
+terrain_structured_segment_length_range: [3.0, 6.0]
+
+terrain_structured_kinds: null  # null/mixed uses all; set flat, slope, stairs, or rough for one kind
+
+terrain_structured_slope_range_deg: [7.0, 12.0]
+
+terrain_structured_step_height_range: [0.03, 0.06]
+
+terrain_structured_step_run_range: [1.5, 2.5]
+
+terrain_structured_roughness_range: [0.0, 0.005]
+
+
+
+# --------------------------------------
+
+# ReferenceTrajectories cursor settings
+
+# --------------------------------------
+
+increment: 2
+
+max_hold_steps: 5
+
+traj_seed: null
+
+rt_verbose: false
+
+
+
+# --------------------------------------
+
+# History buffer configuration
+
+# --------------------------------------
+
+enable_history: false
+
+short_history_max_len: 1
+
+long_history_max_len: 1
+

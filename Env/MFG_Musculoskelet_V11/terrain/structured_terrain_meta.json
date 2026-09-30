@@ -1,0 +1,44 @@
+{
+  "name": "structured_terrain",
+  "mode": "structured",
+  "seed": 42,
+  "nrow": 101,
+  "ncol": 1001,
+  "x_half": 50.0,
+  "y_half": 5.0,
+  "height_scale": 1.0,
+  "base_thickness": 0.02,
+  "smooth_passes": 8,
+  "flat_radius": 0.0,
+  "flat_start_length": 0.2,
+  "flat_transition_length": 0.3,
+  "flat_start_height": 0.0,
+  "height_min_m": 0.0,
+  "height_max_m": 0.5861076712608337,
+  "height_mean_m": 0.14914849400520325,
+  "structured_kinds": [
+    "slope",
+    "stairs",
+    "rough"
+  ],
+  "structured_segment_length_range": [
+    1.0,
+    3.0
+  ],
+  "structured_slope_range_deg": [
+    5.0,
+    7.0
+  ],
+  "structured_step_height_range": [
+    0.05,
+    0.1
+  ],
+  "structured_step_run_range": [
+    1.0,
+    2.0
+  ],
+  "structured_roughness_range": [
+    0.01,
+    0.04
+  ]
+}

@@ -1,0 +1,75 @@
+# Visualization configuration
+
+env:
+
+  id: "MFG_MS_V11"  # MuJoCo environment ID
+
+  render_mode: human # "human", "rgb_array", or None
+
+  width: 1280          # Render window width
+
+  height: 720          # Render window height
+
+
+
+policy:
+
+  checkpoint: "logs/exo_terrain_at/model_best.pt"  # Path to the trained policy checkpoint
+
+  activation: "elu"
+
+  hidden_dims: [2048, 1024, 512, 256]
+
+  terrain_cnn_enabled: true
+
+  terrain_patch_shape: [20, 30]
+
+  terrain_feature_dim: 81
+
+  terrain_attention_enabled: true
+
+  muscle_action_dim: 80
+
+  latent_cov_scale: 1.0
+
+# terrain:
+#   randomize_on_reset: true
+#   mode: structured
+#   random_height_scale: 0.6
+#   flat_start_length: 0.5
+#   flat_transition_length: 0.5
+#   structured_kinds: [slope, stairs, rough]
+#   structured_segment_length_range: [1.5, 3.5]
+#   structured_slope_range_deg: [10.0, 14.0]
+#   structured_step_height_range: [0.05, 0.08]
+#   structured_step_run_range: [0.8, 1.5]
+#   structured_roughness_range: [0.005, 0.025]
+
+terrain:
+  randomize_on_reset: true
+  mode: structured
+  random_height_scale: 2
+  flat_start_length: 0.5
+  flat_transition_length: 0.5
+  structured_kinds: [slope]
+  structured_segment_length_range: [2.0, 2.0]
+  structured_slope_range_deg: [10.0, 10.0]
+
+
+
+visualization:
+
+  num_episodes: 22  # Number of episodes to run
+
+  save_name: "None.txt"
+
+  speedup: 1         # Simulation speed multiplier (1.0 = real-time)
+
+  wandb: False  # Save video to files
+
+  video_dir: "videos"  # Where to save recordings
+
+export:
+  terrain_seed: 12345
+  terrain_seed_mode: shared
+

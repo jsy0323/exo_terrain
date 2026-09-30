@@ -1,0 +1,99 @@
+hydra:
+  run:
+    dir: .
+  output_subdir: null
+env:
+  id: "MFG_MS_V11"
+  num_envs: 64
+
+terrain:
+  randomize_on_reset: True  # false uses the fixed hfield file referenced by the XML
+  mode: structured
+  random_height_scale: 0.6
+  flat_start_length: 0.5
+  flat_transition_length: 0.5
+  structured_kinds: [slope, stairs, rough]  # remove flat segments for hard terrain
+  structured_segment_length_range: [1.5, 3.5]
+  structured_slope_range_deg: [10.0, 14.0]
+  structured_step_height_range: [0.05, 0.08]
+  structured_step_run_range: [0.8, 1.5]
+  structured_roughness_range: [0.005, 0.025]
+
+train:
+  num_steps_per_env: 600
+  # 没有测出极限
+  num_learning_iterations: 6000
+  empirical_normalization: true
+  save_interval: 1000  
+  experiment_name: MFG_MS_V11
+  run_name: "test"
+
+  logger: wandb
+  wandb_project: MS_RL_exo
+
+  # -- load and resuming
+  load_run: -1  # -1 means load latest run
+  # resume_path: null  # updated from load_run and checkpoint
+  checkpoint: -1  # -1 means load latest checkpoint
+
+  algorithm:
+    class_name: PPO
+
+    value_loss_coef: 0.5
+    clip_param: 0.2
+    use_clipped_value_loss: true
+
+    desired_kl: 0.02
+    entropy_coef: 0
+    # gamma
+    gamma: 0.95
+    lam: 0.95
+    max_grad_norm: 1.0
+
+    learning_rate: 2e-5
+    num_learning_epochs: 4 #具体问一下KL
+    num_mini_batches: 8   #可以降低 
+    schedule: adaptive        
+
+  
+  policy:
+    # class_name: ActorCriticMultiAgent
+    class_name: ActorCriticTerrainExo
+    # class_name: ActorCriticLatentExo
+    activation: elu
+    actor_hidden_dims: [2048,1024,512,256]
+    critic_hidden_dims: [2048,1024,512,256]
+    init_noise_std: 0.05
+    noise_std_type: "scalar"  # 'scalar' or 'log'
+    terrain_cnn_enabled: true
+    terrain_obs_enabled: true
+    terrain_patch_shape: [20, 30]
+    terrain_feature_dim: 81
+    terrain_attention_enabled: true
+    muscle_action_dim: 80
+    latent_cov_scale: 1.0
+    exo_action_dim: 2
+    first256: True  # true limits the exo actor to phase + current proprioception (first 256 obs)
+    exo_obs: false
+    exo_obs_noise_std: 0
+    # Multi-agent policy example (shared state, two branches):
+    agent_action_dims: [2, 106]  # [exo_motor_dim, human_dim]
+    shared_actor_obs: False
+    human_branch_idx: 1  # index of branch that should load legacy human checkpoint
+
+  discriminator:
+    use: false
+    hidden_dims: [1024,512]
+    reward_scale: 1.
+    expert_noise_std: 0.04
+    expert_noise_decay: 0.9995
+    amploader:
+      amp_data_path: "Env/AMP_OBS/KITandLouis"
+      dataset_names: null
+      dataset_weights: null
+
+seed: 0
+device: "cuda"
+
+log_dir: "logs/exo_terrain_active"
+resume_path: "logs/exo_terrain_at/model_best1.pt"

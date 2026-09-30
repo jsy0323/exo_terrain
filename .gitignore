@@ -1,0 +1,45 @@
+# Python 和虚拟环境
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# 密钥与本机配置
+.env
+.env.*
+!.env.example
+.vscode/
+.idea/
+/.codex
+/.agents/
+
+# 训练输出、权重和实验图表
+/logs/
+/models/
+/wandb/
+/csv/
+/plots_exo_terrain/
+/plots_noexo/
+/mean_reward_2000.csv
+*.pt
+*.pth
+*.ckpt
+*.npz
+events.out.tfevents.*
+
+# 日志和备份
+*.log
+/log.txt
+/MUJOCO_LOG.TXT
+*.bak
+
+# 系统文件
+.DS_Store
+._*
+Thumbs.db
