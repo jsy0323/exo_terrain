@@ -76,6 +76,132 @@ def _cleanup_shared_memory():
 
 atexit.register(_cleanup_shared_memory)
 
+
+def _checkpoint_state_dict(checkpoint_path, device):
+    checkpoint_path = os.fspath(checkpoint_path)
+    if not os.path.isfile(checkpoint_path):
+        raise FileNotFoundError(f"Checkpoint not found: {checkpoint_path}")
+    checkpoint = torch.load(
+        checkpoint_path,
+        map_location=device,
+        weights_only=False,
+    )
+    state_dict = checkpoint.get("model_state_dict")
+    if not isinstance(state_dict, dict):
+        raise ValueError(
+            f"Checkpoint has no model_state_dict: {checkpoint_path}"
+        )
+    clean_state = {
+        str(key).replace("module.", ""): value
+        for key, value in state_dict.items()
+    }
+    return checkpoint, clean_state
+
+
+def _find_flat_exo_branch(state_dict, exo_action_dim):
+    """Find the multi-agent actor branch whose final layer emits exo actions."""
+    branch_ids = set()
+    for key in state_dict:
+        parts = key.split(".")
+        if len(parts) >= 5 and parts[0] == "actor_branches" and parts[1].isdigit():
+            branch_ids.add(int(parts[1]))
+
+    candidates = []
+    for branch_id in sorted(branch_ids):
+        prefix = f"actor_branches.{branch_id}.net."
+        output_layers = []
+        for key, tensor in state_dict.items():
+            if not key.startswith(prefix) or not key.endswith(".weight"):
+                continue
+            layer_token = key[len(prefix) :].split(".", 1)[0]
+            if layer_token.isdigit() and getattr(tensor, "ndim", 0) == 2:
+                output_layers.append((int(layer_token), tensor))
+        if output_layers:
+            _, final_weight = max(output_layers, key=lambda item: item[0])
+            if int(final_weight.shape[0]) == int(exo_action_dim):
+                candidates.append(branch_id)
+
+    if len(candidates) != 1:
+        raise ValueError(
+            "Could not identify one flat-policy exo branch with output dimension "
+            f"{exo_action_dim}; candidates={candidates}, branches={sorted(branch_ids)}"
+        )
+    return candidates[0]
+
+
+def load_exo_actor_checkpoint(
+    policy,
+    checkpoint_path,
+    device,
+    load_noise_std=True,
+):
+    """Load only an exoskeleton actor from a flat or terrain-exo checkpoint."""
+    policy = getattr(policy, "module", policy)
+    if not hasattr(policy, "exo_actor") or not hasattr(policy, "exo_action_dim"):
+        raise TypeError(
+            "exo_checkpoint_path requires a policy exposing exo_actor and "
+            "exo_action_dim (for example ActorCriticTerrainExo)."
+        )
+
+    _, state_dict = _checkpoint_state_dict(checkpoint_path, device)
+    native_prefix = "exo_actor."
+    if any(key.startswith(native_prefix) for key in state_dict):
+        source_prefix = native_prefix
+        source_description = "native terrain-exo actor"
+    else:
+        branch_id = _find_flat_exo_branch(state_dict, policy.exo_action_dim)
+        source_prefix = f"actor_branches.{branch_id}."
+        source_description = f"flat multi-agent branch {branch_id}"
+
+    source_actor_state = {
+        key[len(source_prefix) :]: tensor
+        for key, tensor in state_dict.items()
+        if key.startswith(source_prefix)
+    }
+    target_actor_state = policy.exo_actor.state_dict()
+    missing = sorted(set(target_actor_state) - set(source_actor_state))
+    unexpected = sorted(set(source_actor_state) - set(target_actor_state))
+    shape_mismatches = [
+        (
+            key,
+            tuple(source_actor_state[key].shape),
+            tuple(target_actor_state[key].shape),
+        )
+        for key in sorted(set(target_actor_state) & set(source_actor_state))
+        if source_actor_state[key].shape != target_actor_state[key].shape
+    ]
+    if missing or unexpected or shape_mismatches:
+        raise ValueError(
+            "Exo actor architecture mismatch while loading "
+            f"{checkpoint_path}: missing={missing}, unexpected={unexpected}, "
+            f"shape_mismatches={shape_mismatches}"
+        )
+    policy.exo_actor.load_state_dict(source_actor_state, strict=True)
+
+    loaded_noise_std = False
+    if load_noise_std and hasattr(policy, "exo_log_std"):
+        source_log_std = state_dict.get("exo_log_std")
+        if source_log_std is None:
+            source_log_std = state_dict.get("log_std")
+            if source_log_std is not None:
+                source_log_std = source_log_std.reshape(-1)[-int(policy.exo_action_dim) :]
+        if source_log_std is not None:
+            source_log_std = source_log_std.reshape_as(policy.exo_log_std)
+            with torch.no_grad():
+                policy.exo_log_std.copy_(
+                    source_log_std.to(
+                        device=policy.exo_log_std.device,
+                        dtype=policy.exo_log_std.dtype,
+                    )
+                )
+            loaded_noise_std = True
+
+    print(
+        f"Loaded {source_description} from {checkpoint_path} into "
+        f"ActorCriticTerrainExo ({len(source_actor_state)} tensors, "
+        f"noise_std={'loaded' if loaded_noise_std else 'kept'})."
+    )
+
 @main(version_base=None, config_path="configs", config_name="default_V11")
 def hydra_main(cfg):
     cfg = yaml.safe_load(OmegaConf.to_yaml(cfg))
@@ -136,6 +262,7 @@ def hydra_main(cfg):
     )
 
     resume_path = cfg.get("resume_path", None)
+    exo_checkpoint_path = cfg.get("exo_checkpoint_path", None)
     
     runner = OnPolicyRunner(
         env,
@@ -143,7 +270,24 @@ def hydra_main(cfg):
         log_dir=cfg.get("log_dir", "./logs"),
         device=cfg.get("device", "cpu"),
     )
-    runner.load(resume_path, load_optimizer=False)
+    if resume_path:
+        load_optimizer = bool(cfg.get("resume_load_optimizer", False))
+        runner.load(resume_path, load_optimizer=load_optimizer)
+        if bool(cfg.get("resume_restore_iteration", False)):
+            resume_checkpoint, _ = _checkpoint_state_dict(resume_path, "cpu")
+            runner.current_learning_iteration = int(resume_checkpoint.get("iter", 0))
+            print(
+                "Restored learning iteration to "
+                f"{runner.current_learning_iteration} from {resume_path}."
+            )
+
+    if exo_checkpoint_path:
+        load_exo_actor_checkpoint(
+            runner.alg.policy,
+            exo_checkpoint_path,
+            device=cfg.get("device", "cpu"),
+            load_noise_std=bool(cfg.get("exo_load_noise_std", True)),
+        )
     runner.learn(num_learning_iterations=cfg["train"]["num_learning_iterations"])
 
 

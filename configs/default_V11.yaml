@@ -12,7 +12,7 @@ terrain:
   random_height_scale: 0.6
   flat_start_length: 0.5
   flat_transition_length: 0.5
-  structured_kinds: [slope, stairs, rough]  # remove flat segments for hard terrain
+  structured_kinds: [slope]  # remove flat segments for hard terrain
   structured_segment_length_range: [1.5, 3.5]
   structured_slope_range_deg: [10.0, 14.0]
   structured_step_height_range: [0.05, 0.08]
@@ -22,7 +22,7 @@ terrain:
 train:
   num_steps_per_env: 600
   # 没有测出极限
-  num_learning_iterations: 6000
+  num_learning_iterations: 1000
   empirical_normalization: true
   save_interval: 1000  
   experiment_name: MFG_MS_V11
@@ -73,12 +73,13 @@ train:
     muscle_action_dim: 80
     latent_cov_scale: 1.0
     exo_action_dim: 2
+    # Both actors retain legacy policy obs; interface state is sent separately to the critic.
     first256: True  # true limits the exo actor to phase + current proprioception (first 256 obs)
     exo_obs: false
     exo_obs_noise_std: 0
     # Multi-agent policy example (shared state, two branches):
     agent_action_dims: [2, 106]  # [exo_motor_dim, human_dim]
-    shared_actor_obs: False
+    shared_actor_obs: True
     human_branch_idx: 1  # index of branch that should load legacy human checkpoint
 
   discriminator:
@@ -95,5 +96,14 @@ train:
 seed: 0
 device: "cuda"
 
-log_dir: "logs/exo_terrain_active"
+log_dir: "logs/exo_terrain_actslope"
 resume_path: "logs/exo_terrain_at/model_best1.pt"
+# Optional flat/native exo checkpoint used only to initialize the exo actor.
+# Set this to null when resume_path already points to a full ActorCriticTerrainExo run.
+exo_checkpoint_path: "models/exo_flat_terrain/model_best.pt"
+exo_load_noise_std: true
+
+# For a full training resume, enable both options and set exo_checkpoint_path: null.
+# For legacy humanoid + flat-exo initialization, keep both false.
+resume_load_optimizer: false
+resume_restore_iteration: false

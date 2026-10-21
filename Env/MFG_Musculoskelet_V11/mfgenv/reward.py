@@ -1300,8 +1300,9 @@ def compute_joint_imitation(env: Any) -> Tuple[float, float, Dict[str, Any]]:
     """
     try:
         # Simulation
-        qpos = env.data.qpos
-        qvel = env.data.qvel
+        state_map = env.human_state_map
+        qpos = env.data.qpos[state_map.qpos_indices]
+        qvel = env.data.qvel[state_map.qvel_indices]
         jpos_c = inverse_convert_ref_traj_qpos(qpos)
         jvel_c = inverse_convert_ref_traj_qvel(qvel, jpos_c)
            

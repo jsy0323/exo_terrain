@@ -440,6 +440,7 @@ def playback_ref_traj(
                 qpos = convert_ref_traj_qpos(qpos_ref)
                 qvel = convert_ref_traj_qvel(qvel_ref, qpos_ref)
                 
+                qpos, qvel = env.human_state_map.expand(qpos, qvel)
                 if qpos.shape[0] != model.nq or qvel.shape[0] != model.nv:
                     raise ValueError(
                         f"Converted qpos length {qpos.shape[0]} != model.nq {model.nq}"

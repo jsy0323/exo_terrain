@@ -50,6 +50,72 @@
 		<geom name="floor" type="hfield" hfield="random_terrain" pos="0 0 0" material="MatPlane" condim="3" friction="1 0.05 0.05" />
 		<camera name="fixed" pos="0 0 2" quat="1 0 0 0" />
 		<body name="pelvis" pos="0 0 0.95" childclass="ZXY" quat="0.70710678 0.70710678 0.0 0.0">
+			<!-- BEGIN SOFT CONTACT pelvis -->
+			<body name="interface_pelvis_tissue" pos="-.07 .015 0">
+				<inertial pos="0 0 0" mass=".001" diaginertia=".001 .001 .001" />
+				<geom name="interface_tissue_pelvis_0_0_m1" type="sphere" pos="-0.105 -0.025 0" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+				<geom name="interface_tissue_pelvis_0_0_p1" type="sphere" pos="0.105 -0.025 0" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+				<geom name="interface_tissue_pelvis_0_2_m1" type="sphere" pos="0 -0.025 -0.14" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+				<geom name="interface_tissue_pelvis_0_2_p1" type="sphere" pos="0 -0.025 0.14" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+				<geom name="interface_tissue_pelvis_1_0_m1" type="sphere" pos="-0.105 0.025 0" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+				<geom name="interface_tissue_pelvis_1_0_p1" type="sphere" pos="0.105 0.025 0" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+				<geom name="interface_tissue_pelvis_1_2_m1" type="sphere" pos="0 0.025 -0.14" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+				<geom name="interface_tissue_pelvis_1_2_p1" type="sphere" pos="0 0.025 0.14" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+			</body>
+			<body name="interface_pelvis_cuff" pos="-.07 .015 0">
+				<inertial pos="0 0 0" mass=".4" diaginertia=".008 .012 .008" />
+				<joint name="interface_pelvis_slide_x" type="slide" axis="1 0 0" limited="true" range="-0.03 0.03" stiffness="0" damping="0" frictionloss="0" armature="0" solreflimit=".02 1" />
+				<joint name="interface_pelvis_slide_y" type="slide" axis="0 1 0" limited="true" range="-0.03 0.03" stiffness="0" damping="0" frictionloss="0" armature="0" solreflimit=".02 1" />
+				<joint name="interface_pelvis_slide_z" type="slide" axis="0 0 1" limited="true" range="-0.03 0.03" stiffness="0" damping="0" frictionloss="0" armature="0" solreflimit=".02 1" />
+				<joint name="interface_pelvis_hinge_x" type="hinge" axis="1 0 0" limited="true" range="-0.25 0.25" stiffness="0" damping="0" frictionloss="0" armature="0" solreflimit=".02 1" />
+				<joint name="interface_pelvis_hinge_y" type="hinge" axis="0 1 0" limited="true" range="-0.25 0.25" stiffness="0" damping="0" frictionloss="0" armature="0" solreflimit=".02 1" />
+				<joint name="interface_pelvis_hinge_z" type="hinge" axis="0 0 1" limited="true" range="-0.25 0.25" stiffness="0" damping="0" frictionloss="0" armature="0" solreflimit=".02 1" />
+				<geom name="interface_pad_pelvis_0_0_m1" type="box" pos="-0.127 -0.025 0" size="0.006 0.025 0.026" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+				<geom name="interface_pad_pelvis_0_0_p1" type="box" pos="0.127 -0.025 0" size="0.006 0.025 0.026" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+				<geom name="interface_pad_pelvis_0_2_m1" type="box" pos="0 -0.025 -0.162" size="0.026 0.025 0.006" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+				<geom name="interface_pad_pelvis_0_2_p1" type="box" pos="0 -0.025 0.162" size="0.026 0.025 0.006" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+				<geom name="interface_pad_pelvis_1_0_m1" type="box" pos="-0.127 0.025 0" size="0.006 0.025 0.026" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+				<geom name="interface_pad_pelvis_1_0_p1" type="box" pos="0.127 0.025 0" size="0.006 0.025 0.026" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+				<geom name="interface_pad_pelvis_1_2_m1" type="box" pos="0 0.025 -0.162" size="0.026 0.025 0.006" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+				<geom name="interface_pad_pelvis_1_2_p1" type="box" pos="0 0.025 0.162" size="0.026 0.025 0.006" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+				<body name="interface_exo_hip_r" pos="0.018724 -0.09649 0.07726">
+					<joint name="interface_hip_flexion_r" type="hinge" axis="0 0 1" limited="true" range="-.7 2.3" stiffness="0" damping=".05" armature=".001" />
+					<joint name="interface_hip_adduction_r" type="hinge" axis="1 0 0" limited="true" range="-1 1" stiffness="0" damping=".05" armature=".001" />
+					<joint name="interface_hip_rotation_r" type="hinge" axis="0 1 0" limited="true" range="-.9 .9" stiffness="0" damping=".05" armature=".001" />
+					<inertial pos="0 -.12 0" mass=".2" diaginertia=".003 .001 .003" />
+					<geom type="capsule" fromto="0 0 0 0 -.22 0" size=".008" mass="0" contype="0" conaffinity="0" rgba=".15 .25 .35 1" group="0" />
+					<body name="interface_thigh_cuff_r" pos="-0.005 -0.217 0">
+						<inertial pos="0 0 0" mass=".13" diaginertia=".001 .001 .001" />
+						<geom name="interface_pad_thigh_r_0_0_m1" type="box" pos="-0.082 -0.035 0" size="0.006 0.025 0.026" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_thigh_r_0_0_p1" type="box" pos="0.082 -0.035 0" size="0.006 0.025 0.026" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_thigh_r_0_2_m1" type="box" pos="0 -0.035 -0.077" size="0.026 0.025 0.006" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_thigh_r_0_2_p1" type="box" pos="0 -0.035 0.077" size="0.026 0.025 0.006" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_thigh_r_1_0_m1" type="box" pos="-0.082 0.035 0" size="0.006 0.025 0.026" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_thigh_r_1_0_p1" type="box" pos="0.082 0.035 0" size="0.006 0.025 0.026" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_thigh_r_1_2_m1" type="box" pos="0 0.035 -0.077" size="0.026 0.025 0.006" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_thigh_r_1_2_p1" type="box" pos="0 0.035 0.077" size="0.026 0.025 0.006" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+					</body>
+				</body>
+				<body name="interface_exo_hip_l" pos="0.018724 -0.09649 -0.07726">
+					<joint name="interface_hip_flexion_l" type="hinge" axis="0 0 1" limited="true" range="-.7 2.3" stiffness="0" damping=".05" armature=".001" />
+					<joint name="interface_hip_adduction_l" type="hinge" axis="-1 0 0" limited="true" range="-1 1" stiffness="0" damping=".05" armature=".001" />
+					<joint name="interface_hip_rotation_l" type="hinge" axis="0 -1 0" limited="true" range="-.9 .9" stiffness="0" damping=".05" armature=".001" />
+					<inertial pos="0 -.12 0" mass=".2" diaginertia=".003 .001 .003" />
+					<geom type="capsule" fromto="0 0 0 0 -.22 0" size=".008" mass="0" contype="0" conaffinity="0" rgba=".15 .25 .35 1" group="0" />
+					<body name="interface_thigh_cuff_l" pos="-0.005 -0.217 0">
+						<inertial pos="0 0 0" mass=".13" diaginertia=".001 .001 .001" />
+						<geom name="interface_pad_thigh_l_0_0_m1" type="box" pos="-0.082 -0.035 0" size="0.006 0.025 0.026" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_thigh_l_0_0_p1" type="box" pos="0.082 -0.035 0" size="0.006 0.025 0.026" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_thigh_l_0_2_m1" type="box" pos="0 -0.035 -0.077" size="0.026 0.025 0.006" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_thigh_l_0_2_p1" type="box" pos="0 -0.035 0.077" size="0.026 0.025 0.006" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_thigh_l_1_0_m1" type="box" pos="-0.082 0.035 0" size="0.006 0.025 0.026" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_thigh_l_1_0_p1" type="box" pos="0.082 0.035 0" size="0.006 0.025 0.026" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_thigh_l_1_2_m1" type="box" pos="0 0.035 -0.077" size="0.026 0.025 0.006" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_thigh_l_1_2_p1" type="box" pos="0 0.035 0.077" size="0.026 0.025 0.006" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+					</body>
+				</body>
+			</body>
+			<!-- END SOFT CONTACT -->
 			<!-- Passive hip exoskeleton disabled: pelvis-mounted belt and frame.
 			<body name="exo_waist" pos="-0.12 0.1 0" euler="1.5708 0 0">
 				<inertial pos="0 0 0" mass="0.2" diaginertia="0.007 0.004 0.011" />
@@ -163,6 +229,19 @@
 			<site name="semiten_l-P1" pos="-0.1038 -0.1253 -0.0515" class="muscleSite" />
 			<site name="tfl_l-P1" pos="-0.0311 0.0214 -0.1241" class="muscleSite" />
 			<body name="femur_r" pos="-0.056276 -0.07849 0.07726">
+				<!-- BEGIN SOFT CONTACT femur_r -->
+				<body name="interface_thigh_tissue_r" pos="0 -.22 0">
+					<inertial pos="0 0 0" mass=".001" diaginertia=".001 .001 .001" />
+					<geom name="interface_tissue_thigh_r_0_0_m1" type="sphere" pos="-0.06 -0.035 0" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+					<geom name="interface_tissue_thigh_r_0_0_p1" type="sphere" pos="0.06 -0.035 0" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+					<geom name="interface_tissue_thigh_r_0_2_m1" type="sphere" pos="0 -0.035 -0.055" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+					<geom name="interface_tissue_thigh_r_0_2_p1" type="sphere" pos="0 -0.035 0.055" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+					<geom name="interface_tissue_thigh_r_1_0_m1" type="sphere" pos="-0.06 0.035 0" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+					<geom name="interface_tissue_thigh_r_1_0_p1" type="sphere" pos="0.06 0.035 0" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+					<geom name="interface_tissue_thigh_r_1_2_m1" type="sphere" pos="0 0.035 -0.055" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+					<geom name="interface_tissue_thigh_r_1_2_p1" type="sphere" pos="0 0.035 0.055" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+				</body>
+				<!-- END SOFT CONTACT -->
 				<!-- Passive exoskeleton thigh shell disabled.
 				<body name="exo_shank_r" pos="0 -0.25 0">
 					<inertial pos="0 0.1 -0.01" mass="0.13" diaginertia="0.0007 0.0007 0.0003" />
@@ -232,12 +311,38 @@
 				<site name="vasmed_r-P2" pos="0.0356 -0.2769 0.0009" class="muscleSite" />
 				<site name="KnExt_at_fem_r_site_vasmed_r_side" pos="0.02 -0.37 -0.008" class="muscleSite" />
 				<body name="tibia_r" pos="0 -0.404425 -0.00126526">
-					<inertial pos="-0.007418 -0.154615 0.00246" mass="3.5" fullinertia="0.0466918 0.00484289 0.0467674 0 0 0" />
-					<body name="exo_shank_r" pos="0 -0.2 0">
-						<inertial pos="-0.02 0.06 0" mass="0.13" diaginertia="0.0007 0.0007 0.0003" />
-						<geom name="exo_shank_r_shell" class="visual" type="mesh" mesh="shanksleeve" pos="-0.007 0 -0.057" euler="0 -1.5708 0" rgba="0.1 0.8 0.3 1" />
-						<site name="exo_cable_guide_r" pos="-0.09 0.05 0" size="0.005" rgba="1 0 0 1" />
+					<!-- BEGIN SOFT CONTACT tibia_r -->
+					<body name="interface_shank_tissue_r" pos="0 -.2 0">
+						<inertial pos="0 0 0" mass=".001" diaginertia=".001 .001 .001" />
+						<geom name="interface_tissue_shank_r_0_0_m1" type="sphere" pos="-0.035 -0.035 0" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+						<geom name="interface_tissue_shank_r_0_0_p1" type="sphere" pos="0.035 -0.035 0" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+						<geom name="interface_tissue_shank_r_0_2_m1" type="sphere" pos="0 -0.035 -0.032" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+						<geom name="interface_tissue_shank_r_0_2_p1" type="sphere" pos="0 -0.035 0.032" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+						<geom name="interface_tissue_shank_r_1_0_m1" type="sphere" pos="-0.035 0.035 0" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+						<geom name="interface_tissue_shank_r_1_0_p1" type="sphere" pos="0.035 0.035 0" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+						<geom name="interface_tissue_shank_r_1_2_m1" type="sphere" pos="0 0.035 -0.032" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+						<geom name="interface_tissue_shank_r_1_2_p1" type="sphere" pos="0 0.035 0.032" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
 					</body>
+					<body name="exo_shank_r" pos="0 -.2 0">
+						<inertial pos="0 0 0" mass=".13" diaginertia=".001 .001 .001" />
+						<joint name="interface_shank_r_slide_x" type="slide" axis="1 0 0" limited="true" range="-0.03 0.03" stiffness="0" damping="0" frictionloss="0" armature="0" solreflimit=".02 1" />
+						<joint name="interface_shank_r_slide_y" type="slide" axis="0 1 0" limited="true" range="-0.03 0.03" stiffness="0" damping="0" frictionloss="0" armature="0" solreflimit=".02 1" />
+						<joint name="interface_shank_r_slide_z" type="slide" axis="0 0 1" limited="true" range="-0.03 0.03" stiffness="0" damping="0" frictionloss="0" armature="0" solreflimit=".02 1" />
+						<joint name="interface_shank_r_hinge_x" type="hinge" axis="1 0 0" limited="true" range="-0.25 0.25" stiffness="0" damping="0" frictionloss="0" armature="0" solreflimit=".02 1" />
+						<joint name="interface_shank_r_hinge_y" type="hinge" axis="0 1 0" limited="true" range="-0.25 0.25" stiffness="0" damping="0" frictionloss="0" armature="0" solreflimit=".02 1" />
+						<joint name="interface_shank_r_hinge_z" type="hinge" axis="0 0 1" limited="true" range="-0.25 0.25" stiffness="0" damping="0" frictionloss="0" armature="0" solreflimit=".02 1" />
+						<site name="exo_cable_guide_r" pos="-.09 .05 0" size=".005" rgba="1 0 0 1" />
+						<geom name="interface_pad_shank_r_0_0_m1" type="box" pos="-0.057 -0.035 0" size="0.006 0.025 0.026" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_shank_r_0_0_p1" type="box" pos="0.057 -0.035 0" size="0.006 0.025 0.026" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_shank_r_0_2_m1" type="box" pos="0 -0.035 -0.054" size="0.026 0.025 0.006" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_shank_r_0_2_p1" type="box" pos="0 -0.035 0.054" size="0.026 0.025 0.006" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_shank_r_1_0_m1" type="box" pos="-0.057 0.035 0" size="0.006 0.025 0.026" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_shank_r_1_0_p1" type="box" pos="0.057 0.035 0" size="0.006 0.025 0.026" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_shank_r_1_2_m1" type="box" pos="0 0.035 -0.054" size="0.026 0.025 0.006" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_shank_r_1_2_p1" type="box" pos="0 0.035 0.054" size="0.026 0.025 0.006" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+					</body>
+					<!-- END SOFT CONTACT -->
+					<inertial pos="-0.007418 -0.154615 0.00246" mass="3.5" fullinertia="0.0466918 0.00484289 0.0467674 0 0 0" />
 					<joint name="knee_angle_r" type="hinge" pos="0 0 0" axis="0.0 -0.0707131 -0.997497" limited="true" range="-0.05 2.356194" ref="0" actuatorfrcrange="-250 250" />
 					<site name="tibia_r_sensor" pos="0 0 0" class="sensorSite" />
 					<geom class="visual" name="r_tibia" type="mesh" mesh="r_tibia" />
@@ -373,6 +478,19 @@
 					</body>
 				</body>
 			<body name="femur_l" pos="-0.056276 -0.07849 -0.07726">
+				<!-- BEGIN SOFT CONTACT femur_l -->
+				<body name="interface_thigh_tissue_l" pos="0 -.22 0">
+					<inertial pos="0 0 0" mass=".001" diaginertia=".001 .001 .001" />
+					<geom name="interface_tissue_thigh_l_0_0_m1" type="sphere" pos="-0.06 -0.035 0" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+					<geom name="interface_tissue_thigh_l_0_0_p1" type="sphere" pos="0.06 -0.035 0" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+					<geom name="interface_tissue_thigh_l_0_2_m1" type="sphere" pos="0 -0.035 -0.055" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+					<geom name="interface_tissue_thigh_l_0_2_p1" type="sphere" pos="0 -0.035 0.055" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+					<geom name="interface_tissue_thigh_l_1_0_m1" type="sphere" pos="-0.06 0.035 0" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+					<geom name="interface_tissue_thigh_l_1_0_p1" type="sphere" pos="0.06 0.035 0" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+					<geom name="interface_tissue_thigh_l_1_2_m1" type="sphere" pos="0 0.035 -0.055" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+					<geom name="interface_tissue_thigh_l_1_2_p1" type="sphere" pos="0 0.035 0.055" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+				</body>
+				<!-- END SOFT CONTACT -->
 				<!-- Passive exoskeleton thigh shell disabled.
 				<body name="exo_shank_l" pos="0 -0.25 0">
 					<inertial pos="0 0.1 -0.01" mass="0.13" diaginertia="0.0007 0.0007 0.0003" />
@@ -442,12 +560,38 @@
 				<site name="vasmed_l-P2" pos="0.0356 -0.2769 -0.0009" class="muscleSite" />
 				<site name="KnExt_at_fem_l_site_vasmed_l_side" pos="0.02 -0.37 0.008" class="muscleSite" />
 				<body name="tibia_l" pos="0 -0.404425 0.00126526">
-					<inertial pos="-0.007418 -0.154615 -0.00246" mass="3.5" fullinertia="0.0466918 0.00484289 0.0467674 0 0 0" />
-					<body name="exo_shank_l" pos="0 -0.2 0">
-						<inertial pos="-0.02 0.06 0" mass="0.13" diaginertia="0.0007 0.0007 0.0003" />
-						<geom name="exo_shank_l_shell" class="visual" type="mesh" mesh="shanksleeve" pos="-0.007 0 -0.057" euler="0 -1.5708 0" rgba="0.1 0.8 0.3 1" />
-						<site name="exo_cable_guide_l" pos="-0.09 0.05 -0.003" size="0.005" rgba="1 0 0 1" />
+					<!-- BEGIN SOFT CONTACT tibia_l -->
+					<body name="interface_shank_tissue_l" pos="0 -.2 0">
+						<inertial pos="0 0 0" mass=".001" diaginertia=".001 .001 .001" />
+						<geom name="interface_tissue_shank_l_0_0_m1" type="sphere" pos="-0.035 -0.035 0" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+						<geom name="interface_tissue_shank_l_0_0_p1" type="sphere" pos="0.035 -0.035 0" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+						<geom name="interface_tissue_shank_l_0_2_m1" type="sphere" pos="0 -0.035 -0.032" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+						<geom name="interface_tissue_shank_l_0_2_p1" type="sphere" pos="0 -0.035 0.032" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+						<geom name="interface_tissue_shank_l_1_0_m1" type="sphere" pos="-0.035 0.035 0" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+						<geom name="interface_tissue_shank_l_1_0_p1" type="sphere" pos="0.035 0.035 0" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+						<geom name="interface_tissue_shank_l_1_2_m1" type="sphere" pos="0 0.035 -0.032" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
+						<geom name="interface_tissue_shank_l_1_2_p1" type="sphere" pos="0 0.035 0.032" size=".018" mass="0" group="0" contype="0" conaffinity="0" rgba=".85 .4 .35 .45" />
 					</body>
+					<body name="exo_shank_l" pos="0 -.2 0">
+						<inertial pos="0 0 0" mass=".13" diaginertia=".001 .001 .001" />
+						<joint name="interface_shank_l_slide_x" type="slide" axis="1 0 0" limited="true" range="-0.03 0.03" stiffness="0" damping="0" frictionloss="0" armature="0" solreflimit=".02 1" />
+						<joint name="interface_shank_l_slide_y" type="slide" axis="0 1 0" limited="true" range="-0.03 0.03" stiffness="0" damping="0" frictionloss="0" armature="0" solreflimit=".02 1" />
+						<joint name="interface_shank_l_slide_z" type="slide" axis="0 0 1" limited="true" range="-0.03 0.03" stiffness="0" damping="0" frictionloss="0" armature="0" solreflimit=".02 1" />
+						<joint name="interface_shank_l_hinge_x" type="hinge" axis="1 0 0" limited="true" range="-0.25 0.25" stiffness="0" damping="0" frictionloss="0" armature="0" solreflimit=".02 1" />
+						<joint name="interface_shank_l_hinge_y" type="hinge" axis="0 1 0" limited="true" range="-0.25 0.25" stiffness="0" damping="0" frictionloss="0" armature="0" solreflimit=".02 1" />
+						<joint name="interface_shank_l_hinge_z" type="hinge" axis="0 0 1" limited="true" range="-0.25 0.25" stiffness="0" damping="0" frictionloss="0" armature="0" solreflimit=".02 1" />
+						<site name="exo_cable_guide_l" pos="-.09 .05 -0.003" size=".005" rgba="1 0 0 1" />
+						<geom name="interface_pad_shank_l_0_0_m1" type="box" pos="-0.057 -0.035 0" size="0.006 0.025 0.026" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_shank_l_0_0_p1" type="box" pos="0.057 -0.035 0" size="0.006 0.025 0.026" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_shank_l_0_2_m1" type="box" pos="0 -0.035 -0.054" size="0.026 0.025 0.006" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_shank_l_0_2_p1" type="box" pos="0 -0.035 0.054" size="0.026 0.025 0.006" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_shank_l_1_0_m1" type="box" pos="-0.057 0.035 0" size="0.006 0.025 0.026" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_shank_l_1_0_p1" type="box" pos="0.057 0.035 0" size="0.006 0.025 0.026" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_shank_l_1_2_m1" type="box" pos="0 0.035 -0.054" size="0.026 0.025 0.006" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+						<geom name="interface_pad_shank_l_1_2_p1" type="box" pos="0 0.035 0.054" size="0.026 0.025 0.006" mass="0" group="0" contype="0" conaffinity="0" rgba=".15 .25 .35 .75" />
+					</body>
+					<!-- END SOFT CONTACT -->
+					<inertial pos="-0.007418 -0.154615 -0.00246" mass="3.5" fullinertia="0.0466918 0.00484289 0.0467674 0 0 0" />
 					<joint name="knee_angle_l" type="hinge" pos="0 0 0" axis="0.0 0.0707131 -0.997497" limited="true" range="-0.05 2.356194" ref="0" actuatorfrcrange="-250 250" />
 					<site name="tibia_l_sensor" pos="0 0 0" class="sensorSite" />
 					<geom class="visual" name="l_tibia" type="mesh" mesh="l_tibia" />
@@ -813,6 +957,48 @@
 		<motor name="ankle_motor_l" tendon="exo_cable_l" gear="-200" ctrllimited="true" ctrlrange="0 1" />
 		</actuator>
 	<contact>
+		<!-- BEGIN SOFT CONTACT pairs -->
+		<pair name="interface_contact_pelvis_0_0_m1" geom1="interface_tissue_pelvis_0_0_m1" geom2="interface_pad_pelvis_0_0_m1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_pelvis_0_0_p1" geom1="interface_tissue_pelvis_0_0_p1" geom2="interface_pad_pelvis_0_0_p1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_pelvis_0_2_m1" geom1="interface_tissue_pelvis_0_2_m1" geom2="interface_pad_pelvis_0_2_m1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_pelvis_0_2_p1" geom1="interface_tissue_pelvis_0_2_p1" geom2="interface_pad_pelvis_0_2_p1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_pelvis_1_0_m1" geom1="interface_tissue_pelvis_1_0_m1" geom2="interface_pad_pelvis_1_0_m1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_pelvis_1_0_p1" geom1="interface_tissue_pelvis_1_0_p1" geom2="interface_pad_pelvis_1_0_p1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_pelvis_1_2_m1" geom1="interface_tissue_pelvis_1_2_m1" geom2="interface_pad_pelvis_1_2_m1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_pelvis_1_2_p1" geom1="interface_tissue_pelvis_1_2_p1" geom2="interface_pad_pelvis_1_2_p1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_thigh_r_0_0_m1" geom1="interface_tissue_thigh_r_0_0_m1" geom2="interface_pad_thigh_r_0_0_m1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_thigh_r_0_0_p1" geom1="interface_tissue_thigh_r_0_0_p1" geom2="interface_pad_thigh_r_0_0_p1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_thigh_r_0_2_m1" geom1="interface_tissue_thigh_r_0_2_m1" geom2="interface_pad_thigh_r_0_2_m1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_thigh_r_0_2_p1" geom1="interface_tissue_thigh_r_0_2_p1" geom2="interface_pad_thigh_r_0_2_p1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_thigh_r_1_0_m1" geom1="interface_tissue_thigh_r_1_0_m1" geom2="interface_pad_thigh_r_1_0_m1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_thigh_r_1_0_p1" geom1="interface_tissue_thigh_r_1_0_p1" geom2="interface_pad_thigh_r_1_0_p1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_thigh_r_1_2_m1" geom1="interface_tissue_thigh_r_1_2_m1" geom2="interface_pad_thigh_r_1_2_m1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_thigh_r_1_2_p1" geom1="interface_tissue_thigh_r_1_2_p1" geom2="interface_pad_thigh_r_1_2_p1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_shank_r_0_0_m1" geom1="interface_tissue_shank_r_0_0_m1" geom2="interface_pad_shank_r_0_0_m1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_shank_r_0_0_p1" geom1="interface_tissue_shank_r_0_0_p1" geom2="interface_pad_shank_r_0_0_p1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_shank_r_0_2_m1" geom1="interface_tissue_shank_r_0_2_m1" geom2="interface_pad_shank_r_0_2_m1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_shank_r_0_2_p1" geom1="interface_tissue_shank_r_0_2_p1" geom2="interface_pad_shank_r_0_2_p1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_shank_r_1_0_m1" geom1="interface_tissue_shank_r_1_0_m1" geom2="interface_pad_shank_r_1_0_m1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_shank_r_1_0_p1" geom1="interface_tissue_shank_r_1_0_p1" geom2="interface_pad_shank_r_1_0_p1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_shank_r_1_2_m1" geom1="interface_tissue_shank_r_1_2_m1" geom2="interface_pad_shank_r_1_2_m1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_shank_r_1_2_p1" geom1="interface_tissue_shank_r_1_2_p1" geom2="interface_pad_shank_r_1_2_p1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_thigh_l_0_0_m1" geom1="interface_tissue_thigh_l_0_0_m1" geom2="interface_pad_thigh_l_0_0_m1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_thigh_l_0_0_p1" geom1="interface_tissue_thigh_l_0_0_p1" geom2="interface_pad_thigh_l_0_0_p1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_thigh_l_0_2_m1" geom1="interface_tissue_thigh_l_0_2_m1" geom2="interface_pad_thigh_l_0_2_m1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_thigh_l_0_2_p1" geom1="interface_tissue_thigh_l_0_2_p1" geom2="interface_pad_thigh_l_0_2_p1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_thigh_l_1_0_m1" geom1="interface_tissue_thigh_l_1_0_m1" geom2="interface_pad_thigh_l_1_0_m1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_thigh_l_1_0_p1" geom1="interface_tissue_thigh_l_1_0_p1" geom2="interface_pad_thigh_l_1_0_p1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_thigh_l_1_2_m1" geom1="interface_tissue_thigh_l_1_2_m1" geom2="interface_pad_thigh_l_1_2_m1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_thigh_l_1_2_p1" geom1="interface_tissue_thigh_l_1_2_p1" geom2="interface_pad_thigh_l_1_2_p1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_shank_l_0_0_m1" geom1="interface_tissue_shank_l_0_0_m1" geom2="interface_pad_shank_l_0_0_m1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_shank_l_0_0_p1" geom1="interface_tissue_shank_l_0_0_p1" geom2="interface_pad_shank_l_0_0_p1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_shank_l_0_2_m1" geom1="interface_tissue_shank_l_0_2_m1" geom2="interface_pad_shank_l_0_2_m1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_shank_l_0_2_p1" geom1="interface_tissue_shank_l_0_2_p1" geom2="interface_pad_shank_l_0_2_p1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_shank_l_1_0_m1" geom1="interface_tissue_shank_l_1_0_m1" geom2="interface_pad_shank_l_1_0_m1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_shank_l_1_0_p1" geom1="interface_tissue_shank_l_1_0_p1" geom2="interface_pad_shank_l_1_0_p1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_shank_l_1_2_m1" geom1="interface_tissue_shank_l_1_2_m1" geom2="interface_pad_shank_l_1_2_m1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<pair name="interface_contact_shank_l_1_2_p1" geom1="interface_tissue_shank_l_1_2_p1" geom2="interface_pad_shank_l_1_2_p1" condim="3" friction="0.7 0.7 .001 .0001 .0001" solref="0.01 1" solimp=".95 .99 .004 .5 2" margin="0" gap="0" />
+		<!-- END SOFT CONTACT -->
 	</contact>
 	<sensor>
 		<velocimeter name="pelvis_vel_sensor" site="pelvis_sensor" />

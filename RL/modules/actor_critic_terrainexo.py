@@ -639,6 +639,20 @@ class ActorCriticTerrainExo(nn.Module):
 
     def load_state_dict(self, state_dict, strict: bool = True):
         clean_state = {str(key).replace("module.", ""): value for key, value in state_dict.items()}
+        # Actor observations keep their original layout. The privileged critic
+        # appends interface state, so old critic weights can keep their prefix.
+        key = 'critic.0.weight'
+        source = clean_state.get(key)
+        target = self.state_dict()[key]
+        if (source is not None and source.ndim == 2
+                and source.shape[0] == target.shape[0]
+                and source.shape[1] == self.num_actor_obs
+                and target.shape[1] > source.shape[1]):
+            expanded = source.new_zeros(target.shape)
+            expanded[:, :source.shape[1]] = source
+            clean_state[key] = expanded
+            print('ActorCriticTerrainExo: extended critic input with zero-initialized '
+                  'privileged-state weights; actor inputs unchanged.')
         if self._load_legacy_humanoid_checkpoint(clean_state):
             return True
         super().load_state_dict(clean_state, strict=strict)

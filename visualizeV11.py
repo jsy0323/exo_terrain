@@ -48,6 +48,10 @@ class PolicyVisualizer:
         self.num_traj = shared_tm.length()
 
         base_cfg = dict(base_cfg)
+        if self.cfg.get("env", {}).get("model_path"):
+            base_cfg["model_path"] = self.cfg["env"]["model_path"]
+        if "randomize_on_reset" in self.cfg.get("terrain", {}):
+            base_cfg["terrain_randomize_on_reset"] = self.cfg["terrain"]["randomize_on_reset"]
         base_cfg["traj_manager"] = shared_tm
         
         self.env = MFG_Musculoskeletal_V11(
@@ -63,20 +67,18 @@ class PolicyVisualizer:
 
     def load_policy(self):
         """Load trained policy network"""
+        checkpoint = torch.load(self.cfg['policy']['checkpoint'],
+                                map_location=self.device, weights_only=False)
+        critic_obs_dim = int(checkpoint['model_state_dict']['critic.0.weight'].shape[1])
         self.policy = ActorCritic(
             num_actions=self.env.num_actions,
             num_actor_obs=self.env.num_obs,
-            num_critic_obs=self.env.num_obs,
+            num_critic_obs=critic_obs_dim,
             actor_hidden_dims=self.cfg["policy"]["hidden_dims"],
             critic_hidden_dims=self.cfg["policy"]["hidden_dims"],
             muscle_action_dim=self.cfg["policy"].get("muscle_action_dim"),
             latent_cov_scale=self.cfg["policy"].get("latent_cov_scale", 1.0)
         ).to(self.device)
-        
-        if torch.cuda.is_available():
-            checkpoint = torch.load(self.cfg["policy"]["checkpoint"], weights_only=False)
-        else:
-            checkpoint = torch.load(self.cfg["policy"]["checkpoint"],map_location=torch.device('cpu'))
         
         self.obs_normalizer.load_state_dict(checkpoint["obs_norm_state_dict"])
         self.obs_normalizer.eval()

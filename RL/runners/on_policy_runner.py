@@ -164,6 +164,11 @@ class OnPolicyRunner:
         privileged_obs = extras["observations"].get(self.privileged_obs_type, obs)
         obs, privileged_obs = obs.to(self.device), privileged_obs.to(self.device)
         self.train_mode()  # switch to train mode (for dropout for example)
+        # Apply the separate actor/critic normalizers to the initial rollout
+        # observations as well as subsequent environment steps.
+        obs = self.obs_normalizer(obs)
+        privileged_obs = (self.privileged_obs_normalizer(privileged_obs)
+                          if self.privileged_obs_type is not None else obs)
 
         ep_infos = []
         if self.useAmp:
@@ -461,6 +466,11 @@ class OnPolicyRunner:
 
     def load(self, path: str, load_optimizer: bool = True):
         loaded_dict = torch.load(path, weights_only=False)
+        current_state = self.alg.policy.state_dict()
+        resized_inputs = any(
+            key in current_state and tuple(value.shape) != tuple(current_state[key].shape)
+            for key, value in loaded_dict['model_state_dict'].items()
+        )
         # -- Load model
         resumed_training = self.alg.policy.load_state_dict(loaded_dict["model_state_dict"])
         if self.useAmp:
@@ -493,7 +503,9 @@ class OnPolicyRunner:
                     "privileged_obs_normalizer",
                 )
         # -- load optimizer if used
-        if load_optimizer and resumed_training:
+        if load_optimizer and resumed_training and resized_inputs:
+            print('Skipping optimizer state: policy tensor shapes changed during checkpoint migration.')
+        if load_optimizer and resumed_training and not resized_inputs:
             # -- algorithm optimizer
             try:
                 self.alg.optimizer.load_state_dict(loaded_dict["optimizer_state_dict"])
@@ -514,6 +526,7 @@ class OnPolicyRunner:
     def _load_normalizer_state_flexible(normalizer, loaded_state, name: str):
         current = normalizer.state_dict()
         patched = {}
+        resized = False
         for key, target in current.items():
             if key not in loaded_state:
                 patched[key] = target
@@ -523,6 +536,7 @@ class OnPolicyRunner:
                 patched[key] = source
                 continue
             if source.ndim == target.ndim and source.numel() > 0 and target.numel() > 0:
+                resized = True
                 value = target.clone()
                 n = min(source.shape[-1], target.shape[-1])
                 value[..., :n] = source[..., :n]
@@ -535,6 +549,11 @@ class OnPolicyRunner:
                 print(
                     f"Skipped {name}.{key}: old {tuple(source.shape)} -> new {tuple(target.shape)}"
                 )
+        if resized and 'count' in patched:
+            # One shared count cannot describe newly added features. Relearn
+            # critic statistics rather than leaving the new tail near-default
+            # forever behind a checkpoint's large accumulated sample count.
+            patched['count'] = torch.zeros_like(current['count'])
         normalizer.load_state_dict(patched)
 
     def get_inference_policy(self, device=None):

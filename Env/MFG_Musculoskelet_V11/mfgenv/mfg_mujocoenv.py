@@ -19,6 +19,7 @@ from .mujoco_utils import (
     compute_muscle_volumes
 )
 from .common_utils import convert_ref_traj_qpos
+from .human_state import HumanStateMap
 
 from datetime import datetime, timedelta
 
@@ -189,6 +190,7 @@ class MuJoCoEnv(BaseEnv):
         except Exception as e:
             raise RuntimeError(f"Failed to load MuJoCo model: {e}")
 
+        self.human_state_map = HumanStateMap(self.model)
         resolved_model_path = str(Path(model_path).expanduser().resolve())
         cache_key = (resolved_model_path, use_muscle, load_mesh)
 
@@ -210,7 +212,8 @@ class MuJoCoEnv(BaseEnv):
         if meta is None:
             jnt_names = tuple(self.model.joint(i).name for i in range(int(self.model.njnt)))
             actuator_names = tuple(self.model.actuator(i).name for i in range(int(self.model.nu)))
-            check_invalid_names(list(jnt_names), list(actuator_names), use_muscle)
+            check_invalid_names([n for n in jnt_names if not n.startswith('interface_')],
+                                list(actuator_names), use_muscle)
 
             ctrl_low = np.array(
                 [self.model.actuator(i).ctrlrange[0] for i in range(self.model.nu)],
@@ -688,11 +691,10 @@ class MuJoCoEnv(BaseEnv):
     def _compute_site_positions(self, qpos_vec: np.ndarray) -> np.ndarray:
         """Forward reference qpos and return site positions for configured markers."""
         ghost = self._get_ghost_data()
-        qpos_full = convert_ref_traj_qpos(qpos_vec)
+        qpos_full, _ = self.human_state_map.expand(convert_ref_traj_qpos(qpos_vec))
 
-        # Start from current simulated pose to preserve unmatched coordinates.
-        np.copyto(ghost.qpos, self.data.qpos)
-        ghost.qpos[: qpos_full.shape[0]] = qpos_full
+        # The mapping supplies both human coordinates and neutral cuff frames.
+        np.copyto(ghost.qpos, qpos_full)
         ghost.qvel[:] = 0.0
         mujoco.mj_fwdPosition(self.model, ghost)
 

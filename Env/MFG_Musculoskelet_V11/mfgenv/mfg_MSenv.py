@@ -462,7 +462,7 @@ class MFG_Musculoskeletal_V11(MuJoCoEnv):
         # -------------------------------
         self.step_count = 0
         self.max_episode_steps = int(config.get("max_episode_steps", self.DEFAULT_MAX_EPISODE_STEPS))
-        jerk_dim = max(int(self.num_dofs) - 6, 0)
+        jerk_dim = max(int(self.human_state_map.qvel_indices.size) - 6, 0)
         self._jerk_prev1 = np.zeros(jerk_dim, dtype=np.float32)
         self._jerk_prev2 = np.zeros(jerk_dim, dtype=np.float32)
         self._jerk_buf = np.zeros(jerk_dim, dtype=np.float32)
@@ -579,6 +579,8 @@ class MFG_Musculoskeletal_V11(MuJoCoEnv):
             obs_low[start:end] = 0.0
             obs_high[start:end] = 1.0
         self.observation_space = spaces.Box(low=obs_low, high=obs_high, dtype=np.float32)
+        self.num_critic_extra_obs = int(self.human_state_map.interface_state_dim)
+        self.num_privileged_obs = self._obs_dim + self.num_critic_extra_obs
         self._obs_buf = np.empty(self._obs_dim, dtype=np.float32)
 
         # Precompute slices to avoid per-step arithmetic
@@ -638,7 +640,7 @@ class MFG_Musculoskeletal_V11(MuJoCoEnv):
     def _update_joint_jerk_buffers(self) -> None:
         """Update cached joint jerk (second position difference) excluding pelvis DOFs."""
         qpos = self.data.qpos
-        tail = qpos[7:]
+        tail = qpos[self.human_state_map.qpos_indices[7:]]
         have = self._jerk_have_prev
         if have >= 2:
             np.copyto(self._jerk_buf, tail)
@@ -908,6 +910,7 @@ class MFG_Musculoskeletal_V11(MuJoCoEnv):
         
         init_qpos = convert_ref_traj_qpos(ref_qpos)
         init_qvel = convert_ref_traj_qvel(ref_qvel, ref_qpos)
+        init_qpos, init_qvel = self.human_state_map.expand(init_qpos, init_qvel)
         
         nq, nv = int(self.model.nq), int(self.model.nv)
         if init_qpos is None or init_qvel is None:
@@ -1071,6 +1074,8 @@ class MFG_Musculoskeletal_V11(MuJoCoEnv):
             "progress": progress,
             "phase": self.phase.name,
         })
+        if self.num_critic_extra_obs:
+            info['critic_extra_obs'] = self.human_state_map.interface_state(self.data)
     
         self.logger.debug("Environment reset complete: traj_id=%s, frame=%s, fs=%d",
                           info["traj_id"], int(pos), int(self.frame_skip))
@@ -1181,6 +1186,12 @@ class MFG_Musculoskeletal_V11(MuJoCoEnv):
         if not self.log_reward_breakdown:
             reward_info = None
         terminated, term_info = check_termination(self, comps, ["has_fallen", "site_deviation_exceeded"])
+        interface_travel = self.human_state_map.travel_fraction(self.data.qpos)
+        # End slipped/detached episodes before the emergency stops become a
+        # persistent rigid force path that a policy could exploit.
+        term_info['interface_slip'] = not np.isfinite(interface_travel) or interface_travel >= .8
+        terminated = terminated or term_info['interface_slip']
+        info['interface_travel_fraction'] = interface_travel
         
         at_max = (self.step_count >= self.max_episode_steps)
         if self.enable_reach_goal:
@@ -1198,6 +1209,8 @@ class MFG_Musculoskeletal_V11(MuJoCoEnv):
             "traj_id": self.ref_traj.traj_id,
             "progress": float(self.ref_traj._pos) / float(self.ref_traj.traj_frames),
         })
+        if self.num_critic_extra_obs:
+            info['critic_extra_obs'] = self.human_state_map.interface_state(self.data)
         if self.log_reward_breakdown and reward_info is not None:
             info["reward_info"] = reward_info
         if self.log_clip_stats and clip_stats is not None:

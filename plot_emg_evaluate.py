@@ -132,7 +132,7 @@ from scipy.interpolate import PchipInterpolator
 
 CASE_SPECS = [
     {
-        "npz_path": Path("logs/exo_terrain_at/traj_emg_hybrid/traj_0.npz"),
+        "npz_path": Path("logs/exo_terrain_at/traj_emg_best1/traj_0.npz"),
         "label": "Cable Exoskeleton",
         "color": "#0072B2",
     },

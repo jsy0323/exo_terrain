@@ -1,0 +1,9 @@
+{
+  "height_scale": 2.4,
+  "step_height": 0.06,
+  "step_run": 0.8,
+  "num_steps": 40,
+  "first_riser_x": 0.5,
+  "grid_spacing_m": 0.02,
+  "plateau_start_x": 31.700000000000003
+}

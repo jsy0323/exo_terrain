@@ -7,7 +7,7 @@ COM Y deviation, excessive pelvis/torso angle deviations and high contact forces
 
 import math
 import logging
-from typing import Any, Dict, Tuple, List
+from typing import Any, Dict, Tuple, List, Optional
 
 # Configure module-level logger
 logger = logging.getLogger(__name__)
@@ -100,10 +100,16 @@ def check_termination(
 
 def _has_fallen(
         env: Any,
-        pelvis_height_range: Tuple[float, float] = (0.6, 1.3)
+        pelvis_height_range: Optional[Tuple[float, float]] = None,
         ) -> bool:
     """
     Check whether the simulated agent has fallen, based on pelvis height.
+
+    The height limits come from ``env.alive_reward`` unless an explicit range
+    is supplied.  When ``use_terrain_relative_height`` is enabled, the terrain
+    surface below the pelvis is subtracted from its world-frame height.  This
+    prevents a standing agent from being classified as fallen simply because
+    it has walked uphill above the old absolute world-z limit.
 
     Parameters
     ----------
@@ -115,9 +121,10 @@ def _has_fallen(
               World-frame positions of all bodies; pelvis height is read
               from xpos[pelvis_id, 2].
           - logger (optional) with `.error(msg, *args)` for error reporting.
-    pelvis_height_range : tuple of float, default=(0.6, 1.3)
-        Acceptable vertical (z-axis) range of the pelvis center. If the pelvis
-        z-position falls outside this interval, the agent is considered fallen.
+    pelvis_height_range : tuple of float, optional
+        Explicit acceptable pelvis height range. If omitted, read
+        ``env.alive_reward['pelvis_height_range']`` and fall back to
+        ``(0.6, 1.3)``.
 
     Returns
     -------
@@ -129,17 +136,39 @@ def _has_fallen(
     -----
     - The pelvis body id is cached on the first call as `env._pelvis_body_id`
       to avoid repeated model lookups.
+    - Terrain-relative height is used only when requested and an hfield exists.
     - In case of exceptions (e.g., missing pelvis body), the function logs
       an error (if a logger is available) and returns True as a fail-safe.
     """
     try:
+        params = getattr(env, "alive_reward", {}) or {}
+        if pelvis_height_range is None:
+            pelvis_height_range = params.get("pelvis_height_range", (0.6, 1.3))
+        if not isinstance(pelvis_height_range, (list, tuple)) or len(pelvis_height_range) != 2:
+            pelvis_height_range = (0.6, 1.3)
+
         bid = getattr(env, "_pelvis_body_id", None)
         if bid is None:
             bid = env.model.body("pelvis").id
             env._pelvis_body_id = bid
-            
-        z = float(env.data.xpos[bid, 2])
-        min_z, max_z = pelvis_height_range
+
+        pelvis_pos = env.data.xpos[bid]
+        z = float(pelvis_pos[2])
+        use_relative = bool(params.get("use_terrain_relative_height", False))
+        if use_relative and int(getattr(env.model, "nhfield", 0)) > 0:
+            from .terrain import sample_hfield_height_m
+
+            terrain_height = sample_hfield_height_m(
+                env.model,
+                env.data,
+                float(pelvis_pos[0]),
+                float(pelvis_pos[1]),
+                hfield_name=str(getattr(env, "terrain_hfield_name", "random_terrain")),
+                geom_name=str(getattr(env, "terrain_floor_geom_name", "floor")),
+            )
+            z -= float(terrain_height)
+
+        min_z, max_z = (float(pelvis_height_range[0]), float(pelvis_height_range[1]))
         if (z < min_z) or (z > max_z):
             return True
         return False

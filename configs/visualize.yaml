@@ -1,6 +1,7 @@
 # Visualization configuration
 
 env:
+  model_path: Env/MFG_Musculoskelet_V11/MFG_Raj2015_V11_fixed_stairs_exo.xml
 
   id: "MFG_MS_V11"  # MuJoCo environment ID
 
@@ -14,7 +15,7 @@ env:
 
 policy:
 
-  checkpoint: "logs/exo_terrain_at/model_best.pt"  # Path to the trained policy checkpoint
+  checkpoint: "logs/exo_terrain_at/model_best1.pt"  # Path to the trained policy checkpoint
 
   activation: "elu"
 
@@ -46,14 +47,26 @@ policy:
 #   structured_roughness_range: [0.005, 0.025]
 
 terrain:
-  randomize_on_reset: true
+  randomize_on_reset: false
   mode: structured
   random_height_scale: 2
   flat_start_length: 0.5
   flat_transition_length: 0.5
   structured_kinds: [slope]
-  structured_segment_length_range: [2.0, 2.0]
-  structured_slope_range_deg: [10.0, 10.0]
+  structured_segment_length_range: [1.0, 1.0]
+  structured_slope_range_deg: [6.0, 6.0]
+
+# terrain:
+#   randomize_on_reset: true
+#   mode: structured
+#   random_height_scale: 0.6
+#   flat_start_length: 0.5
+#   flat_transition_length: 0.5
+
+#   structured_kinds: [stairs]
+#   structured_segment_length_range: [1.5, 3.5]
+#   structured_step_height_range: [0.05, 0.08]
+#   structured_step_run_range: [0.8, 1.5]
 
 
 

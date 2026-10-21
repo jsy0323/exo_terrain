@@ -2,6 +2,7 @@ import numpy as np
 import gymnasium as gym
 import torch
 from RL.env import VecEnv
+from RL.env.observations import build_critic_observations
 
 
 class GymMujocoWrapper(VecEnv):
@@ -39,6 +40,7 @@ class GymMujocoWrapper(VecEnv):
             self.num_envs, dtype=torch.long, device=self.device
         )
         self._obs = None
+        self._critic_obs = None
         self._modify_action_space()
         self.reset()
 
@@ -48,7 +50,11 @@ class GymMujocoWrapper(VecEnv):
 
     def get_observations(self) -> tuple[torch.Tensor, dict]:
         obs_tensor = torch.tensor(self._obs, dtype=torch.float, device=self.device)
-        return obs_tensor, {"observations": {"policy": obs_tensor}}
+        extras = {'observations': {'policy': obs_tensor}}
+        if self._critic_obs is not None:
+            extras['observations']['critic'] = torch.tensor(
+                self._critic_obs, dtype=torch.float, device=self.device)
+        return obs_tensor, extras
 
     def reset(
         self,
@@ -63,7 +69,7 @@ class GymMujocoWrapper(VecEnv):
         musculoskeletal environment keeps a separate RNG for terrain
         generation, so ``terrain_seed`` resets that generator explicitly.
         """
-        obs_list = []
+        obs_list, obs_infos = [], []
         for env in self.envs:
             if terrain_seed is not None:
                 base_env = env.unwrapped
@@ -73,9 +79,11 @@ class GymMujocoWrapper(VecEnv):
                         "does not expose a terrain RNG."
                     )
                 base_env._terrain_rng = np.random.default_rng(int(terrain_seed))
-            obs, _ = env.reset(seed=seed, traj_id=id, frame=frame)
+            obs, info = env.reset(seed=seed, traj_id=id, frame=frame)
             obs_list.append(obs)
+            obs_infos.append(info)
         self._obs = np.stack(obs_list, axis=0)
+        self._update_critic_observations(obs_infos)
         return self.get_observations()
 
     def step(
@@ -85,23 +93,32 @@ class GymMujocoWrapper(VecEnv):
             actions = torch.clamp(actions, -self.clip_actions, self.clip_actions)
         actions_np = actions.cpu().numpy()
 
-        obs_list, rewards, dones = [], [], []
+        obs_list, rewards, dones, obs_infos = [], [], [], []
         for i, env in enumerate(self.envs):
             obs, rew, terminated, truncated, info = env.step(actions_np[i])
             done = terminated or truncated
+            obs_info = info
             if done and self.auto_reset:
-                obs, _ = env.reset()
+                obs, obs_info = env.reset()
             obs_list.append(obs)
+            obs_infos.append(obs_info)
             rewards.append(rew)
             dones.append(done)
 
         self._obs = np.stack(obs_list, axis=0)
+        self._update_critic_observations(obs_infos)
         obs_tensor = torch.tensor(self._obs, dtype=torch.float, device=self.device)
         rewards_tensor = torch.tensor(rewards, dtype=torch.float, device=self.device)
         dones_tensor = torch.tensor(dones, dtype=torch.long, device=self.device)
 
 
+        _, extras = self.get_observations()
+        info.update(extras)
         return obs_tensor, rewards_tensor, dones_tensor, info
+
+    def _update_critic_observations(self, infos):
+        self._critic_obs = build_critic_observations(self._obs, infos)
+        self.num_privileged_obs = (0 if self._critic_obs is None else self._critic_obs.shape[-1])
 
     def close(self):
         for env in self.envs:

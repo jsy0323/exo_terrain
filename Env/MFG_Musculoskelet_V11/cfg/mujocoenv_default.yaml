@@ -25,9 +25,9 @@ clip_action: true
 
 load_mesh: true
 
-render_mode: "human"
+render_mode: "human"  
 
-auto_render: true
+auto_render: True
 
 camera: 1  # (Optional) which camera to use for osffscreen rendering
 
@@ -61,7 +61,7 @@ traj_manager:
 
 reward_weights:
 
-  alive: 0.1
+  alive: 0.0
 
   imitation: 0.8
 
@@ -107,7 +107,9 @@ imitation_weights:
 
 smooth_weights:
 
-  energy: 0.06
+  # Muscle activation cost. With reward_weights.smooth=-0.08 this becomes
+  # an energy penalty that encourages the exoskeleton to unload the human.
+  energy: 10.0
 
   synergy: 0.0 # 0.06-0.04
 
@@ -175,13 +177,13 @@ terrain_reward:
 
 alive_reward:
 
-  reward: 1.0
+  reward: 0
 
   fallen_reward: 0.0
 
   pelvis_height_range: [0.55, 1.25]
 
-  use_terrain_relative_height: false
+  use_terrain_relative_height: true
 
 
 
@@ -341,7 +343,7 @@ terrain_flat_transition_length: 1
 
 terrain_structured_segment_length_range: [3.0, 6.0]
 
-terrain_structured_kinds: null  # null/mixed uses all; set flat, slope, stairs, or rough for one kind
+terrain_structured_kinds: slope  # null/mixed uses all; set flat, slope, stairs, or rough for one kind
 
 terrain_structured_slope_range_deg: [7.0, 12.0]
 

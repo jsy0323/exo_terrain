@@ -54,6 +54,8 @@ class PolicyVisualizer:
         with open("Env/MFG_Musculoskelet_V11/cfg/mujocoenv_default.yaml", "r",encoding="utf-8") as f:
             base_cfg = yaml.safe_load(f)
         base_cfg = dict(base_cfg)
+        if self.cfg.get("env", {}).get("model_path"):
+            base_cfg["model_path"] = self.cfg["env"]["model_path"]
         apply_terrain_config_overrides(base_cfg, self.cfg.get("terrain"))
         terrain_cnn_enabled = bool(self.cfg.get("policy", {}).get("terrain_cnn_enabled", False))
         base_cfg["terrain_obs_enabled"] = terrain_cnn_enabled
@@ -304,12 +306,8 @@ class PolicyVisualizer:
                 f"Checkpoint action dim {num_actions} does not match env action dim "
                 f"{self.env.num_actions}."
             )
-        if int(critic_spec["input_dim"]) != int(norm_dim):
-            raise ValueError(
-                "Terrain-exo critic obs dim does not match obs normalizer dim: "
-                f"{critic_spec['input_dim']} vs {norm_dim}"
-            )
-
+        # Actor normalization describes policy obs only. A privileged critic
+        # may have additional inputs, which are unused during inference.
         terrain_patch_shape = tuple(policy_cfg.get("terrain_patch_shape", [20, 30]))
         terrain_feature_dim = int(policy_cfg.get("terrain_feature_dim", 81))
         terrain_cnn_enabled = any(

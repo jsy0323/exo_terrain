@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import gymnasium as gym
 from RL.env.vec_env import VecEnv
+from RL.env.observations import build_critic_observations
 from stable_baselines3.common.vec_env import VecEnv as SB3VecEnv
 
 idx_parts = [
@@ -77,6 +78,7 @@ class SB3RslVecEnv(VecEnv):
         self._obs = None
         self._obs_tem = None
         self._prev_amp_positions = None
+        self._critic_obs = None
         self.reset()
 
     @property
@@ -86,6 +88,10 @@ class SB3RslVecEnv(VecEnv):
     def get_observations(self):
         obs_tensor = torch.tensor(self._obs, dtype=torch.float32, device=self.device)
         extras = {"observations": {"policy": obs_tensor}}
+        if self._critic_obs is not None:
+            extras['observations']['critic'] = torch.tensor(
+                self._critic_obs, dtype=torch.float32, device=self.device
+            )
 
         if self._use_amp:
             prev_amp = torch.tensor(
@@ -103,6 +109,7 @@ class SB3RslVecEnv(VecEnv):
         obs = out[0] if isinstance(out, tuple) else out
         self._obs = np.array(obs)
         self._obs_tem = self._obs.copy()
+        self._update_critic_observations(self.env.reset_infos)
         if self._use_amp:
             self._prev_amp_positions = get_amp(self._obs).copy()
         return self.get_observations()
@@ -123,6 +130,11 @@ class SB3RslVecEnv(VecEnv):
 
         self._obs = np.array(obs_batch)
         self._obs_tem = np.array(obs_term)
+        # SB3 returns reset observations for done envs; pair them with reset
+        # privileged state rather than the terminal state's info payload.
+        current_infos = [self.env.reset_infos[i] if done_batch[i] else info_batch[i]
+                         for i in range(self.num_envs)]
+        self._update_critic_observations(current_infos)
 
         obs_tensor = torch.tensor(self._obs, dtype=torch.float32, device=self.device)
         obs_term_tensor = torch.tensor(
@@ -132,6 +144,10 @@ class SB3RslVecEnv(VecEnv):
         dones_tensor = torch.tensor(done_batch, dtype=torch.long, device=self.device)
 
         extras = {"observations": {"policy": obs_tensor}}
+        if self._critic_obs is not None:
+            extras['observations']['critic'] = torch.tensor(
+                self._critic_obs, dtype=torch.float32, device=self.device
+            )
 
         if self._use_amp:
             amp_pos = get_amp(obs_tensor)
@@ -162,6 +178,14 @@ class SB3RslVecEnv(VecEnv):
                 truncated_flags, dtype=torch.bool, device=self.device
             )
         return obs_tensor, rewards_tensor, dones_tensor, extras
+
+    def _update_critic_observations(self, infos):
+        critic = build_critic_observations(self._obs, infos)
+        dim = 0 if critic is None else critic.shape[-1]
+        if self.num_privileged_obs and dim != self.num_privileged_obs:
+            raise ValueError('Critic observation dimension changed during rollout')
+        self._critic_obs = critic
+        self.num_privileged_obs = dim
 
     def close(self):
         self.env.close()

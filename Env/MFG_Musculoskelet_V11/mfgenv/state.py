@@ -1469,7 +1469,10 @@ def get_joint_states(
         exclude_pelvis: bool = True,
         ) -> Tuple[np.ndarray, Dict[str, np.ndarray]]:
     """
-    Extract joint-level generalized coordinates (qpos) and velocities (qvel).
+    Extract human joint coordinates and velocities in the original actor order.
+
+    When human_state_map is present, passive interface joints are omitted.
+    They are supplied separately as critic-only state by the environment.
 
     Parameters
     ----------
@@ -1507,7 +1510,12 @@ def get_joint_states(
     data = env.data
     qpos = data.qpos
     qvel = data.qvel
-    
+    # Keep the original human ordering and observation size for both actors.
+    mapping = getattr(env, 'human_state_map', None)
+    if mapping is not None:
+        qpos = qpos[mapping.qpos_indices]
+        qvel = qvel[mapping.qvel_indices]
+
     qpos0 = 7 if exclude_pelvis else 0
     qvel0 = 6 if exclude_pelvis else 0
     if qpos.size <= qpos0 or qvel.size <= qvel0:
@@ -1794,6 +1802,7 @@ def compute_ref_site_kinematics(
         qpos_ref = Q[t]; qvel_ref = V[t]
         d_qpos = convert_ref_traj_qpos(qpos_ref)
         d_qvel = convert_ref_traj_qvel(qvel_ref, qpos_ref)
+        d_qpos, d_qvel = env.human_state_map.expand(d_qpos, d_qvel)
         ref_data.qpos[:] = d_qpos
         ref_data.qvel[:] = d_qvel
         mujoco.mj_forward(model, ref_data)
