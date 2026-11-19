@@ -84,6 +84,9 @@ def hydra_main(cfg):
 
     with open("Env/MFG_Musculoskelet_V11/cfg/mujocoenv_default.yaml", "r", encoding="utf8") as f:
         base_cfg = yaml.safe_load(f)
+    base_cfg = OmegaConf.to_container(
+        OmegaConf.merge(base_cfg, cfg["env"].get("config", {})), resolve=True
+    )
     apply_terrain_config_overrides(base_cfg, cfg.get("terrain"))
     terrain_cnn_enabled = bool(cfg["train"].get("policy", {}).get("terrain_cnn_enabled", False))
     base_cfg["terrain_obs_enabled"] = terrain_cnn_enabled
@@ -123,7 +126,9 @@ def hydra_main(cfg):
             "config": base_cfg,
             "traj_shm_meta": traj_shm_meta,
             "traj_sample_frequency": traj_sample_frequency,
+            "max_episode_steps": int(base_cfg.get("max_episode_steps", 1000)),
         },
+        seed=int(cfg.get("seed", 0)),
     )
 
     env = SB3RslVecEnv(

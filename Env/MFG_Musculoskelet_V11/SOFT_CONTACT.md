@@ -12,7 +12,7 @@
 | --- | --- | --- |
 | `MFG_Raj2015_V11_randomterrainexo.xml` | 骨盆、左右大腿、左右小腿 | 保留两路拉索电机 |
 | `MFG_Raj2015_V11_fixed_slope_6deg_exo.xml` | 同上 | 保留两路拉索电机 |
-| `MFG_Raj2015_V11_fixed_stairs_exo.xml` | 同上 | 保留原文件的电机禁用设置 |
+| `MFG_Raj2015_V11_fixed_stairs_exo.xml` | 同上 | 启用左右拉索及对应的两个踝部电机 |
 
 原 MyoSuite 人体关节、肌肉、肌腱和惯性参数保留。原有小腿刚性护具替换为接触护具；
 新增骨盆／大腿框架后总质量比原随机地形外骨骼模型增加约 1.065 kg。
@@ -108,7 +108,7 @@ critic 归一化扩展后重新累计统计；网络形状变化时跳过旧优�
 python trainV11_reload.py resume_path=null exo_checkpoint_path=null log_dir=logs/exo_soft_contact
 ```
 
-训练 YAML 中原有 checkpoint 设置没有自动覆盖。楼梯可视化所用模型仍按其原有配置禁用电机。
+训练 YAML 中原有 checkpoint 设置没有自动覆盖。楼梯可视化所用模型已启用左右拉索及两个踝部电机，足部端点分别固定在 `calcn_r`、`calcn_l` 上。
 上一版将接口关节交错放入公共观测的 1117 维 checkpoint 不适用于当前公共观测布局。
 尚未运行完整步行 PPO 训练，不能据短时检查推断策略已收敛。
 

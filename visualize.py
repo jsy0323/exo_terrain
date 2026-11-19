@@ -7,6 +7,7 @@ import yaml
 import torch
 import argparse
 import numpy as np
+from omegaconf import OmegaConf
 from pathlib import Path
 from RL.modules.actor_critic_latent_test import ActorCritic as ActorCriticLegacy
 from RL.modules.actor_critic_latent_exo import ActorCritic as ActorCriticExo
@@ -27,8 +28,10 @@ class PolicyVisualizer:
     IMITATION_ERROR_KEYS = ("site_pos_err", "site_vel_err", "joint_angle_err")
     ENERGY_ERROR_KEYS = ("energy_cost", "activation_l1", "activation_l2_sq", "metab_cost")
 
-    def __init__(self, cfg_path):
+    def __init__(self, cfg_path, overrides=None):
         self.load_config(cfg_path)
+        if overrides:
+            self.cfg = OmegaConf.to_container(OmegaConf.merge(self.cfg, overrides), resolve=True)
         self.setup_environment()
         self.num_obs = self.env.num_obs
         self.num_envs = int(self.env.num_envs)
@@ -53,9 +56,20 @@ class PolicyVisualizer:
     def setup_environment(self):
         with open("Env/MFG_Musculoskelet_V11/cfg/mujocoenv_default.yaml", "r",encoding="utf-8") as f:
             base_cfg = yaml.safe_load(f)
-        base_cfg = dict(base_cfg)
+        training_config_path = self.cfg.get("env", {}).get("training_config")
+        if training_config_path:
+            with open(training_config_path, encoding="utf-8") as f:
+                training_cfg = yaml.safe_load(f)
+            base_cfg = OmegaConf.to_container(
+                OmegaConf.merge(base_cfg, training_cfg["env"].get("config", {})), resolve=True
+            )
         if self.cfg.get("env", {}).get("model_path"):
             base_cfg["model_path"] = self.cfg["env"]["model_path"]
+        base_cfg = OmegaConf.to_container(
+            OmegaConf.merge(base_cfg, self.cfg.get("env", {}).get("config", {})), resolve=True
+        )
+        base_cfg["render_mode"] = self.cfg["env"].get("render_mode", "human")
+        base_cfg["auto_render"] = base_cfg["render_mode"] is not None
         apply_terrain_config_overrides(base_cfg, self.cfg.get("terrain"))
         terrain_cnn_enabled = bool(self.cfg.get("policy", {}).get("terrain_cnn_enabled", False))
         base_cfg["terrain_obs_enabled"] = terrain_cnn_enabled
@@ -77,13 +91,14 @@ class PolicyVisualizer:
         
         self.env = MFG_Musculoskeletal_V11(
             config=base_cfg,
-            render_mode="human" if self.cfg["env"]["render_mode"] == "human" else None
+            render_mode=base_cfg["render_mode"],
         )
         # import ipdb;ipdb.set_trace()
         self.env = GymMujocoWrapper(
             self.env,
             device=self.device,
-            is_finite_horizon=False
+            is_finite_horizon=False,
+            auto_reset=False,
         )
         self.base_env = self.env.envs[0]
 
@@ -768,6 +783,8 @@ class PolicyVisualizer:
     def run(self):
         """Run visualization loop"""
         num_episodes = int(self.cfg["visualization"].get("num_episodes", self.num_traj))
+        step_dt = float(self.base_env.opt_time * self.base_env.frame_skip)
+        speed_log_interval = max(1, round(1.0 / step_dt))
         # num_episodes = 3
         print(f"Starting visualization for {num_episodes} episodes (all trajectories)...")
         if self.cfg['visualization']["wandb"]:
@@ -788,6 +805,12 @@ class PolicyVisualizer:
             done = False
             speed,id = self.env.speed()
             print(f"Episode {episode + 1} (traj_id={id}) starting with speed: {speed:.2f}")
+            command = self.base_env.speed_command
+            if command is not None:
+                print(
+                    f"Speed command {command.start_speed:.2f} -> {command.end_speed:.2f} m/s, "
+                    f"hold {command.hold_seconds:.1f} s, acceleration {command.ramp_acceleration:.3f} m/s^2"
+                )
 
             count = 0
             episode_reward_sums = {}
@@ -796,6 +819,7 @@ class PolicyVisualizer:
             term_sums = {"imitation": 0.0, "energy": 0.0, "synergy": 0.0}
             term_counts = {"imitation": 0, "energy": 0, "synergy": 0}
             while not done:
+                step_started = time.perf_counter()
                 count +=1
                 with torch.no_grad():
                     actions = self.policy.act_inference(obs)
@@ -808,6 +832,15 @@ class PolicyVisualizer:
                 obs = self.obs_normalizer(self._compose_policy_obs(obs_raw, info))
                 episode_reward += reward.item()
                 reward_info = info.get("reward_info", {})
+                if command is not None and (count % speed_log_interval == 0 or bool(done)):
+                    speed_info = reward_info.get("goal", {}).get("speed", {})
+                    if "forward_speed" in speed_info:
+                        print(
+                            f"t={count * step_dt:.2f}s "
+                            f"target={speed_info['target_speed']:.2f} m/s "
+                            f"actual={speed_info['forward_speed']:.2f} m/s "
+                            f"error={speed_info['speed_err']:+.2f} m/s"
+                        )
                 terms = self._extract_reward_terms(reward_info)
                 for k, v in terms.items():
                     episode_reward_sums[k] = episode_reward_sums.get(k, 0.0) + v
@@ -838,7 +871,8 @@ class PolicyVisualizer:
                     term_sums["synergy"] += synergy_weighted
                     term_counts["synergy"] += 1
                 # Control playback speed
-                time.sleep(1.0 / (self.env.max_episode_length * self.cfg["visualization"]["speedup"]))
+                target_step_time = step_dt / float(self.cfg["visualization"]["speedup"])
+                time.sleep(max(0.0, target_step_time - (time.perf_counter() - step_started)))
             
             print("episode reward =",episode_reward, ", steps =", count) 
             if count > 0 and episode_reward_sums:

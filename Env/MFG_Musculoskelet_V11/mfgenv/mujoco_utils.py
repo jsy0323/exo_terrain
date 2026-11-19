@@ -24,6 +24,7 @@ def load_mujoco_model(
         model_path: str,
         use_muscle: bool = False,
         load_mesh: bool = False,
+        wearable_sensor_sites: bool = False,
         ) -> Tuple[mujoco.MjModel, mujoco.MjData]:
     """
     Load a MuJoCo model from XML, removing either:
@@ -65,6 +66,9 @@ def load_mujoco_model(
 
     try:
         spec = mujoco.MjSpec.from_file(abs_path)
+        if wearable_sensor_sites:
+            from force_estimation.sensors import add_sensor_sites
+            add_sensor_sites(spec)
 
         keep_groups = {0, 2} if use_muscle else {0, 1}
         for actuator in tuple(spec.actuators):
@@ -73,7 +77,10 @@ def load_mujoco_model(
             except Exception:
                 continue
             if group_id not in keep_groups:
-                actuator.delete()
+                if hasattr(spec, "delete"):
+                    spec.delete(actuator)
+                else:
+                    actuator.delete()
 
         spec.compiler.discardvisual = 0 if load_mesh else 1
 

@@ -1,0 +1,241 @@
+{
+  "schema_version": 1,
+  "sample_rate_hz": 100,
+  "imu_names": [
+    "pelvis",
+    "thigh_l",
+    "thigh_r",
+    "shank_l",
+    "shank_r",
+    "foot_l",
+    "foot_r"
+  ],
+  "imu_fields": [
+    "gyro_xyz",
+    "specific_force_xyz",
+    "gravity_direction_xyz"
+  ],
+  "joint_names": [
+    "hip_flexion_l",
+    "hip_flexion_r",
+    "knee_angle_l",
+    "knee_angle_r",
+    "ankle_angle_l",
+    "ankle_angle_r"
+  ],
+  "extra_names": [
+    "hip_angle_l",
+    "hip_angle_r",
+    "hip_velocity_l",
+    "hip_velocity_r",
+    "fsr_heel_l",
+    "fsr_toe_l",
+    "fsr_heel_r",
+    "fsr_toe_r",
+    "fsr_rate_heel_l",
+    "fsr_rate_toe_l",
+    "fsr_rate_heel_r",
+    "fsr_rate_toe_r",
+    "fsr_sum_l",
+    "fsr_sum_r",
+    "toe_ratio_l",
+    "toe_ratio_r",
+    "fsr_contact_l",
+    "fsr_contact_r",
+    "inclination_thigh_l",
+    "inclination_thigh_r",
+    "inclination_shank_l",
+    "inclination_shank_r",
+    "inclination_foot_l",
+    "inclination_foot_r",
+    "sagittal_gyro_thigh_l",
+    "sagittal_gyro_thigh_r",
+    "sagittal_gyro_shank_l",
+    "sagittal_gyro_shank_r",
+    "sagittal_gyro_foot_l",
+    "sagittal_gyro_foot_r",
+    "knee_angle_proxy_l",
+    "knee_angle_proxy_r",
+    "ankle_angle_proxy_l",
+    "ankle_angle_proxy_r",
+    "hip_acceleration_l",
+    "hip_acceleration_r",
+    "fsr_bw_l",
+    "fsr_bw_r",
+    "hip_moment_proxy_l",
+    "hip_moment_proxy_r",
+    "hip_sine_l",
+    "hip_sine_r",
+    "exo_angle_l",
+    "exo_angle_r",
+    "exo_velocity_l",
+    "exo_velocity_r",
+    "exo_delivered_torque_l",
+    "exo_delivered_torque_r",
+    "exo_present_l",
+    "exo_present_r",
+    "mass_kg",
+    "height_m",
+    "thigh_length_m",
+    "shank_length_m",
+    "foot_length_m",
+    "valid_pelvis",
+    "valid_thigh_l",
+    "valid_thigh_r",
+    "valid_shank_l",
+    "valid_shank_r",
+    "valid_foot_l",
+    "valid_foot_r"
+  ],
+  "torque_units": "N m",
+  "grf_units": "N",
+  "joint_sign": "positive along MJCF joint axis",
+  "torque_formula": "M(q) @ qacc + qfrc_bias - qfrc_constraint",
+  "bio_formula": "tau_total - tau_exo_delivered",
+  "assistance": "unassisted",
+  "gravity_source": "simulated sensor orientation; deployment requires an AHRS estimate",
+  "subject_count": 1,
+  "mujoco_version": "3.11.0",
+  "config": {
+    "collection": {
+      "visualization_config": "configs/visualize.yaml",
+      "checkpoint": "logs/humanoid_walk_run/model_best.pt",
+      "output_dir": "data/force_estimation",
+      "episodes": 30,
+      "duration_s": 20.0,
+      "seed": 20261117
+    },
+    "sample_rate_hz": 100,
+    "window_s": 1.0,
+    "contact_threshold_n": 20.0,
+    "subject": {
+      "height_m": 1.75,
+      "thigh_length_m": 0.42,
+      "shank_length_m": 0.43,
+      "foot_length_m": 0.26
+    },
+    "imu": {
+      "position_offset_m": 0.02,
+      "angle_offset_deg": 5.0,
+      "gyro_noise_std": 0.02,
+      "gyro_bias": 0.02,
+      "acc_noise_std": 0.05,
+      "acc_bias": 0.1,
+      "vibration_hz": [
+        5.0,
+        15.0
+      ],
+      "vibration_max_mps2": 0.3,
+      "delay_ms": [
+        0.0,
+        5.0
+      ],
+      "dropout_probability": 0.0
+    },
+    "encoder": {
+      "quantization_rad": 0.001,
+      "noise_std_rad": 0.002,
+      "cutoff_hz": 30.0
+    },
+    "fsr": {
+      "deadzone": [
+        0.0,
+        20.0
+      ],
+      "gain": [
+        0.7,
+        1.3
+      ],
+      "alpha": [
+        0.7,
+        1.3
+      ],
+      "f_sat": [
+        400.0,
+        1200.0
+      ],
+      "lag_coef": [
+        0.3,
+        1.0
+      ],
+      "creep": [
+        0.0,
+        0.0001
+      ],
+      "bias": [
+        -0.02,
+        0.02
+      ],
+      "sigma": 0.01,
+      "boundary_offset_m": 0.015,
+      "calibration_value": 500.0,
+      "control_dt_s": 0.02
+    },
+    "training": {
+      "target": "bio",
+      "output_dir": "models/force_estimator",
+      "epochs": 30,
+      "batch_size": 32,
+      "stride_samples": 10,
+      "learning_rate": 0.001,
+      "validation_fraction": 0.2,
+      "test_fraction": 0.2,
+      "seed": 42,
+      "device": "cuda",
+      "dropout": 0.1,
+      "torque_scale_nm": 50.0,
+      "grf_scale_n": 750.0
+    }
+  },
+  "episodes": [
+    {
+      "file": "episode_00000.npz",
+      "seed": 20261117,
+      "samples": 2000,
+      "duration_s": 20.00000000000146
+    },
+    {
+      "file": "episode_00001.npz",
+      "seed": 20261118,
+      "samples": 2000,
+      "duration_s": 20.00000000000146
+    },
+    {
+      "file": "episode_00002.npz",
+      "seed": 20261119,
+      "samples": 2000,
+      "duration_s": 20.00000000000146
+    },
+    {
+      "file": "episode_00003.npz",
+      "seed": 20261120,
+      "samples": 2000,
+      "duration_s": 20.00000000000146
+    },
+    {
+      "file": "episode_00004.npz",
+      "seed": 20261121,
+      "samples": 2000,
+      "duration_s": 20.00000000000146
+    },
+    {
+      "file": "episode_00005.npz",
+      "seed": 20261122,
+      "samples": 2000,
+      "duration_s": 20.00000000000146
+    },
+    {
+      "file": "episode_00006.npz",
+      "seed": 20261123,
+      "samples": 2000,
+      "duration_s": 20.00000000000146
+    },
+    {
+      "file": "episode_00007.npz",
+      "seed": 20261124,
+      "samples": 2000,
+      "duration_s": 20.00000000000146
+    }
+  ],
+  "policy_sha256": "7f0b7e64a24a0c14836c19f258599f519a4f9f84ac51424fdad819df9a74bf25"
+}

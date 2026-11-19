@@ -380,9 +380,7 @@
 						
 						<body name="calcn_r" pos="-0.04877 -0.04195 0.00792">
 							<inertial pos="0.08 0.012 0" mass="0.85" fullinertia="6.431e-4 0.0025469 0.0021305 0 0 0" />
-							<!-- Disabled exoskeleton
-<site name="exo_cable_foot_r" pos="-0.03 0.02 -0.005" size="0.005" rgba="0 0 1 1" />
--->
+							<site name="exo_cable_foot_r" pos="-0.03 0.02 -0.005" size="0.005" rgba="0 0 1 1" />
 							<joint name="subtalar_angle_r" type="hinge" pos="0 0 0" axis="0.78718 0.604747 -0.120949" limited="true" range="-0.349066 0.349066" ref="0" actuatorfrcrange="-50 50" />
 							<site name="calcn_r_sensor" pos="0 0 0" class="sensorSite" />
 							<geom class="visual" name="r_foot" type="mesh" mesh="r_foot" />
@@ -626,9 +624,7 @@
 						
 						<body name="calcn_l" pos="-0.04877 -0.04195 -0.00792">
 							<inertial pos="0.08 0.012 0" mass="0.85" fullinertia="6.431e-4 0.0025469 0.0021305 0 0 0" />
-							<!-- Disabled exoskeleton
-<site name="exo_cable_foot_l" pos="-0.03 0.02 0.005" size="0.005" rgba="0 0 1 1" />
--->
+							<site name="exo_cable_foot_l" pos="-0.03 0.02 0.005" size="0.005" rgba="0 0 1 1" />
 							<joint name="subtalar_angle_l" type="hinge" pos="0 0 0" axis="-0.78718 -0.604747 -0.120949" limited="true" range="-0.349066 0.349066" ref="0" actuatorfrcrange="-50 50" />
 							<site name="calcn_l_sensor" pos="0 0 0" class="sensorSite" />
 							<geom class="visual" name="l_foot" type="mesh" mesh="l_foot" />
@@ -927,12 +923,11 @@
 		<position class="up_position" name="head_add" joint="head_add" kp="200" />
 		<position class="up_position" name="head_rot" joint="head_rot" kp="200" />
 		
-		<!-- Disabled exoskeleton
-<motor name="ankle_motor_r" tendon="exo_cable_r" gear="-200" ctrllimited="true" ctrlrange="0 1" />
--->
-		<!-- Disabled exoskeleton
-<motor name="ankle_motor_l" tendon="exo_cable_l" gear="-200" ctrllimited="true" ctrlrange="0 1" />
--->
+		<!-- Exoskeleton cable actuators -->
+		<motor name="ankle_motor_r" tendon="exo_cable_r" gear="-200" ctrllimited="true" ctrlrange="0 1" />
+
+		<motor name="ankle_motor_l" tendon="exo_cable_l" gear="-200" ctrllimited="true" ctrlrange="0 1" />
+
 		</actuator>
 	<contact>
 		<!-- BEGIN SOFT CONTACT pairs -->
@@ -1023,18 +1018,17 @@
 		<gyro name="hand_l_gyro_sensor" site="hand_l_sensor" />
 		</sensor>
 	<tendon>
-		<!-- Disabled exoskeleton
-<spatial name="exo_cable_r" width="0.005" rgba="0.1 0.8 0.3 1">
+		<!-- Exoskeleton cables: floating shank cuff to shoe attachment -->
+		<spatial name="exo_cable_r" width="0.005" rgba="0.1 0.8 0.3 1">
 			<site site="exo_cable_guide_r" />
 			<site site="exo_cable_foot_r" />
 		</spatial>
--->
-		<!-- Disabled exoskeleton
-<spatial name="exo_cable_l" width="0.005" rgba="0.1 0.8 0.3 1">
+
+		<spatial name="exo_cable_l" width="0.005" rgba="0.1 0.8 0.3 1">
 			<site site="exo_cable_guide_l" />
 			<site site="exo_cable_foot_l" />
 		</spatial>
--->
+
 		<spatial name="addbrev_r_tendon" springlength="0.0354503">
 			<site site="addbrev_r-P1" />
 			<geom geom="AB_at_femshaft_r_wrap" sidesite="AB_at_femshaft_r_site_addbrev_r_side" />

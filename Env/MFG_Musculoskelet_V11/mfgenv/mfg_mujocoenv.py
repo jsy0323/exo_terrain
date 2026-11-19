@@ -186,7 +186,10 @@ class MuJoCoEnv(BaseEnv):
         # Load & compile model/data, filtering actuators by use_muscle
         # ---------------------------------------------------------------
         try:
-            self.model, self.data = load_mujoco_model(model_path, use_muscle, load_mesh)
+            self.model, self.data = load_mujoco_model(
+                model_path, use_muscle, load_mesh,
+                wearable_sensor_sites=bool(config.get("wearable_sensor_sites", False)),
+            )
         except Exception as e:
             raise RuntimeError(f"Failed to load MuJoCo model: {e}")
 
@@ -976,8 +979,16 @@ class MuJoCoEnv(BaseEnv):
             m = self.model
             fs = self.frame_skip
             d.ctrl[:] = act
+            physics_callback = getattr(self, "physics_step_callback", None)
+            physics_pre_callback = getattr(self, "physics_pre_step_callback", None)
             for _ in range(fs):
+                if physics_pre_callback is not None:
+                    physics_pre_callback(m, d)
                 mujoco.mj_step(m,d)
+                if physics_callback is not None:
+                    # Synchronize labels and sensors with the post-integration timestamp.
+                    mujoco.mj_forward(m, d)
+                    physics_callback(m, d)
             
         if self._hist_qpos is not None:
             self._hist_step += 1

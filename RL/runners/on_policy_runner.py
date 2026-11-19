@@ -276,7 +276,9 @@ class OnPolicyRunner:
                 if self.training_type == "rl":
                     self.alg.compute_returns(privileged_obs)
             # save best model before update
-            if statistics.mean(rewbuffer) >= max_reward and statistics.mean(lenbuffer) >= max_episode:
+            if (self.log_dir is not None and rewbuffer
+                    and statistics.mean(rewbuffer) >= max_reward
+                    and statistics.mean(lenbuffer) >= max_episode):
                     max_reward=statistics.mean(rewbuffer)
                     max_episode=statistics.mean(lenbuffer)
                     self.save(os.path.join(self.log_dir, f"model_best.pt"))
@@ -487,11 +489,13 @@ class OnPolicyRunner:
                     self.obs_normalizer,
                     loaded_dict["obs_norm_state_dict"],
                     "obs_normalizer",
+                    preserve_count_on_resize=bool(self.cfg.get("preserve_normalizer_count_on_resize", False)),
                 )
                 self._load_normalizer_state_flexible(
                     self.privileged_obs_normalizer,
                     loaded_dict.get("privileged_obs_norm_state_dict", loaded_dict["obs_norm_state_dict"]),
                     "privileged_obs_normalizer",
+                    preserve_count_on_resize=bool(self.cfg.get("preserve_normalizer_count_on_resize", False)),
                 )
             else:
                 # if the training is not resumed but a model is loaded, this run must be distillation training following
@@ -523,7 +527,7 @@ class OnPolicyRunner:
         return loaded_dict.get("infos")
 
     @staticmethod
-    def _load_normalizer_state_flexible(normalizer, loaded_state, name: str):
+    def _load_normalizer_state_flexible(normalizer, loaded_state, name: str, preserve_count_on_resize=False):
         current = normalizer.state_dict()
         patched = {}
         resized = False
@@ -549,7 +553,7 @@ class OnPolicyRunner:
                 print(
                     f"Skipped {name}.{key}: old {tuple(source.shape)} -> new {tuple(target.shape)}"
                 )
-        if resized and 'count' in patched:
+        if resized and 'count' in patched and not preserve_count_on_resize:
             # One shared count cannot describe newly added features. Relearn
             # critic statistics rather than leaving the new tail near-default
             # forever behind a checkpoint's large accumulated sample count.

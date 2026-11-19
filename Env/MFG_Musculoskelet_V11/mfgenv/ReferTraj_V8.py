@@ -543,6 +543,9 @@ class ReferenceTrajectories:
         '_pos',
         '_hold_counter',
         '_has_reached_end',
+        'loop',
+        '_loop_count',
+        '_loop_displacement',
     )
 
     def __init__(
@@ -552,7 +555,8 @@ class ReferenceTrajectories:
         increment: int = 2,
         max_hold_steps: int = 5,
         random_seed: Optional[int] = None,
-        verbose: bool = False
+        verbose: bool = False,
+        loop: bool = False,
     ):
         """
         Bind to a TrajectoryManager and initialize internal state.
@@ -571,6 +575,8 @@ class ReferenceTrajectories:
             Seed for reproducible random selection.
         verbose : bool, default=False
             Enable debug logging if True.
+        loop : bool, default=False
+            Repeat a periodic gait cycle while accumulating horizontal displacement.
         """
         self.logger = logging.getLogger(self.__class__.__name__)
         self.logger.setLevel(logging.DEBUG if verbose else logging.INFO)
@@ -592,6 +598,9 @@ class ReferenceTrajectories:
         self._pos = 0
         self._hold_counter = 0
         self._has_reached_end = False
+        self.loop = bool(loop)
+        self._loop_count = 0
+        self._loop_displacement = np.zeros(3)
 
         # fixed joint mapping and sampling rate
         self.jnt_name = manager.get_jnt_map()
@@ -636,6 +645,15 @@ class ReferenceTrajectories:
             self.step_frames = self.traj_frames
         self.speed = self.manager.get_speed(self.traj_id)
         self.foot_start = self.manager.get_foot_start(self.traj_id)
+        if self.loop:
+            if not self.periodic or self.step_frames < 2:
+                raise ValueError("loop_reference requires a periodic trajectory with at least two frames")
+            # OpenSim horizontal translations are rows 0 and 2.
+            end = min(self.step_frames, self.traj_frames - 1)
+            self._loop_displacement = self.qpos[:3, end] - self.qpos[:3, 0]
+            self._loop_displacement = self._loop_displacement.copy()
+            self._loop_displacement[1] = 0.0
+            self._loop_count = 0
 
         # initialize cursor state
         self._pos = 0
@@ -704,6 +722,7 @@ class ReferenceTrajectories:
             
         self._pos = idx
         self._hold_counter = 0
+        self._loop_count = 0
         self._has_reached_end = (self._pos >= self.traj_frames - 1)
         self.logger.debug(
             f"reset(): traj_id={self.traj_id}, phase={phase_val:.2f}% -> frame={self._pos}, "
@@ -732,6 +751,12 @@ class ReferenceTrajectories:
                 self.logger.debug(f"Hold counter reset from {self._hold_counter} to 0")
             self._hold_counter = 0
         
+        if self.loop:
+            cycles, self._pos = divmod(self._pos + self.increment, self.step_frames)
+            self._loop_count += cycles
+            self._has_reached_end = False
+            return
+
         if self._has_reached_end:
             return
         
@@ -772,6 +797,11 @@ class ReferenceTrajectories:
     def peek(self, offset: int = 0) -> Tuple[np.ndarray, np.ndarray]:
         if not hasattr(self, 'qpos') or not hasattr(self, 'qvel'):
             raise RuntimeError("Trajectory not initialized; call set_trajectory() first.")
+        if self.loop:
+            cycles, i = divmod(self._pos + int(offset), self.step_frames)
+            qpos = self.qpos[:, i].copy()
+            qpos[:3] += (self._loop_count + cycles) * self._loop_displacement
+            return qpos, self.qvel[:, i]
         i = self._idx_clip(int(self._pos) + int(offset))
         return self.qpos[:, i], self.qvel[:, i]
 
@@ -781,6 +811,8 @@ class ReferenceTrajectories:
         """
         if not hasattr(self, 'qpos'):
             raise RuntimeError("Trajectory not initialized; call set_trajectory() first.")
+        if self.loop:
+            return self.peek()[0]
         return self.qpos[:, self._pos]
 
     def get_qvel(self) -> np.ndarray:
@@ -813,6 +845,13 @@ class ReferenceTrajectories:
         
         start_frame = int(self._pos) + int(start_steps) * inc
         last_frame  = start_frame + (num_steps - 1) * inc
+        if self.loop:
+            indices = start_frame + np.arange(num_steps) * inc
+            cycles, indices = np.divmod(indices, self.step_frames)
+            Q = self.qpos[:, indices].copy()
+            Q[:3] += self._loop_displacement[:, None] * (self._loop_count + cycles)
+            V = self.qvel[:, indices]
+            return (Q.T, V.T) if step_major else (Q, V)
     
         if start_frame >= 0 and last_frame <= T - 1:
             qpos_blk = self.qpos[:, start_frame : last_frame + 1 : inc]  # (D, S) view
@@ -843,7 +882,7 @@ class ReferenceTrajectories:
         keys = ['pelvis_tz','pelvis_ty','pelvis_tx',
                 'pelvis_tilt','pelvis_list','pelvis_rotation']
         idxs = [self.jnt_name[k] for k in keys]
-        return self.qpos[idxs, self._pos]
+        return self.get_qpos()[idxs]
 
     def get_pelvis_angV(self) -> np.ndarray:
         """
@@ -923,7 +962,7 @@ class ReferenceTrajectories:
         if data_type == "angle":
             if self.qpos is None:
                 raise RuntimeError("qpos data is not initialized.")
-            return self.qpos[indices, self._pos]
+            return self.get_qpos()[indices]
         elif data_type == "velocity":
             if self.qvel is None:
                 raise RuntimeError("qvel data is not initialized.")

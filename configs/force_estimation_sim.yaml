@@ -1,0 +1,99 @@
+collection:
+  visualization_config: configs/visualize.yaml
+  checkpoint: logs/humanoid_walk_run/model_best.pt
+  output_dir: data/force_estimation_sim_v2_calibrated
+  episodes: 48
+  duration_s: 12.0
+  minimum_duration_fraction: 0.95
+  seed: 20261118
+
+sample_rate_hz: 100
+window_s: 1.0
+contact_threshold_n: 20.0
+subject:
+  height_m: 1.75
+  thigh_length_m: 0.42
+  shank_length_m: 0.43
+  foot_length_m: 0.26
+
+preprocessing:
+  anti_alias_hz: 30.0
+  gravity_source: ahrs
+  warmup_s: 2.0
+  fsr_calibration: bench
+  calibration_noise_std: 0.002
+  ahrs:
+    gain: 1.0
+    startup_s: 2.0
+    acceleration_tolerance_mps2: 2.0
+    rejection_deg: 35.0
+
+imu:
+  position_offset_m: 0.02
+  angle_offset_deg: 5.0
+  gyro_noise_std: 0.02
+  gyro_bias: 0.02
+  acc_noise_std: 0.05
+  acc_bias: 0.1
+  vibration_hz: [5.0, 15.0]
+  vibration_max_mps2: 0.3
+  delay_ms: [0.0, 5.0]
+  dropout_probability: 0.02
+  dropout_burst_rate_hz: 0.03
+  dropout_burst_s: [0.1, 0.3]
+
+encoder:
+  quantization_rad: 0.001
+  noise_std_rad: 0.002
+  cutoff_hz: 30.0
+
+fsr:
+  deadzone: [0.0, 20.0]
+  gain: [0.7, 1.3]
+  alpha: [0.7, 1.3]
+  f_sat: [400.0, 1200.0]
+  lag_coef: [0.3, 1.0]
+  creep: [0.0, 0.0001]
+  bias: [-0.02, 0.02]
+  sigma: 0.01
+  boundary_offset_m: 0.015
+  calibration_value: 500.0
+  control_dt_s: 0.02
+
+experiments:
+  repeats: 2
+  torque_limit_nm: 4.0
+  torque_slew_nm_s: 40.0
+  subjects:
+    - {id: mass_094, mass_scale: 0.94}
+    - {id: mass_097, mass_scale: 0.97}
+    - {id: mass_100, mass_scale: 1.00}
+    - {id: mass_103, mass_scale: 1.03}
+    - {id: mass_106, mass_scale: 1.06}
+    - {id: mass_109, mass_scale: 1.09}
+  motions:
+    - {id: steady, start_speed: 1.3, end_speed: 1.3, hold_seconds: 2.0, acceleration_range: [0.3, 0.6]}
+    - {id: acceleration, start_speed: 1.15, end_speed: 1.75, hold_seconds: 2.0, acceleration_range: [0.3, 0.6]}
+    - {id: deceleration, start_speed: 1.65, end_speed: 1.15, hold_seconds: 2.0, acceleration_range: [0.3, 0.6]}
+    - {id: hip_perturbation, start_speed: 1.3, end_speed: 1.3, hold_seconds: 2.0, acceleration_range: [0.3, 0.6], hip_torque_amplitude_nm: 2.5, hip_torque_frequency_hz: 0.8}
+
+training:
+  include_exo_features: false
+  target: total
+  output_dir: models/force_estimator_sim_v2
+  epochs: 45
+  batch_size: 64
+  stride_samples: 10
+  learning_rate: 0.0003
+  validation_fraction: 0.2
+  test_fraction: 0.2
+  group_by: subject_id
+  validation_groups: [mass_097]
+  test_groups: [mass_109]
+  peak_weight: 1.0
+  calibrate_uncertainty: true
+  seed: 42
+  device: cuda
+  dropout: 0.1
+  torque_scale_nm: 50.0
+  grf_scale_n: 750.0

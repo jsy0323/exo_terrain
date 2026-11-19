@@ -1,6 +1,6 @@
 """
 Reward functions for musculoskeletal simulation environment.
-Provides imitation reward components and (currently stubbed) goal reward.
+Provides imitation, locomotion tracking, balance and regularization rewards.
 @author: YAKE
 """
 import math
@@ -494,6 +494,14 @@ def compute_reward(
     info: Dict[str, Any] = {}
     
     if phase == "IMITATION":
+        if w_goal != 0.0:
+            r_goal, goal_info = _goal(env)
+            total += w_goal * float(r_goal)
+            goal_info["weight"] = w_goal
+        else:
+            goal_info = {"skipped": True, "weight": 0.0}
+        info["goal"] = goal_info
+
         if w_alive != 0.0:
             r_alive, alive_info = get_alive_reward(env, obs_components)
             total += w_alive * float(r_alive)
@@ -1422,12 +1430,17 @@ def get_goal_reward(env: Any) -> Tuple[float, Dict[str, Any]]:
 
     if w_speed != 0.0:
         target_speed = params.get("target_speed", None)
-        if target_speed is None:
+        command = getattr(env, "speed_command", None)
+        if command is not None:
+            target_speed = command.speed
+        elif target_speed is None:
             target_speed = getattr(getattr(env, "ref_traj", None), "speed", 0.0)
         target_speed = float(target_speed)
         sigma = max(float(params.get("speed_sigma", 0.3)), 1e-6)
         direction_mode = str(params.get("speed_direction", "goal"))
-        if direction_mode == "pelvis" or not has_goal_pos:
+        if direction_mode == "command":
+            direction = np.asarray(env.speed_command_direction, dtype=np.float64)[:2]
+        elif direction_mode == "pelvis" or not has_goal_pos:
             direction = np.asarray(getattr(env, "pelvis_heading", np.array([1.0, 0.0, 0.0])), dtype=np.float64)
             direction = direction[:2]
         else:
@@ -1443,7 +1456,12 @@ def get_goal_reward(env: Any) -> Tuple[float, Dict[str, Any]]:
             direction_xy = direction / norm
             forward_speed = float(np.dot(pelvis_vel[:2], direction_xy))
         speed_err = forward_speed - target_speed
-        speed_reward = math.exp(-((speed_err / sigma) ** 2))
+        lateral_speed = float(np.dot(pelvis_vel[:2], [-direction_xy[1], direction_xy[0]]))
+        lateral_sigma = params.get("lateral_speed_sigma")
+        tracking_error = (speed_err / sigma) ** 2
+        if lateral_sigma is not None:
+            tracking_error += (lateral_speed / max(float(lateral_sigma), 1e-6)) ** 2
+        speed_reward = math.exp(-tracking_error)
         total += w_speed * speed_reward
         info["speed"] = {
             "weight": w_speed,
@@ -1451,6 +1469,8 @@ def get_goal_reward(env: Any) -> Tuple[float, Dict[str, Any]]:
             "forward_speed": float(forward_speed),
             "target_speed": target_speed,
             "speed_err": float(speed_err),
+            "lateral_speed": lateral_speed,
+            "command_acceleration": 0.0 if command is None else command.acceleration,
             "sigma": sigma,
             "direction": direction_xy.astype(float).tolist(),
             "direction_mode": direction_mode,

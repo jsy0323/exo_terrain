@@ -1,0 +1,105 @@
+hydra:
+  run:
+    dir: .
+  output_subdir: null
+
+env:
+  id: MFG_MS_V11
+  num_envs: 64
+  config:
+    model_path: Env/MFG_Musculoskelet_V11/MFG_Raj2015_V11.xml
+    render_mode: null
+    auto_render: false
+    max_episode_steps: 1000  # 20 seconds at dt=0.02
+    enable_reach_goal: false
+    loop_reference: true
+    terrain_obs_enabled: false
+    terrain_randomize_on_reset: false
+    terrain_init_clearance: 0.0
+    pelvis_init_lift: 0.0
+    log_reward_breakdown: true
+
+    speed_command:
+      enabled: true
+      start_speed: 1.4
+      end_speed: 2.8
+      hold_seconds: 2.0
+      acceleration_range: [0.3, 1.0]  # sample once per episode, m/s^2
+
+    reward_weights:
+      alive: 0.1
+      imitation: 0.1
+      terrain: 0.0
+      com: 0.0
+      upward: 0.1
+      grf: 0.0
+      smooth: -0.02
+      goal: 1.0
+    imitation_weights:
+      site_pos: 0.5
+      site_vel: 0.0
+      site_orn: 0.0
+      joint_angle: 0.5
+      joint_angvel: 0.0
+    terrain_weights:
+      pelvis_height: 0.0
+      foot_clearance: 0.0
+    smooth_weights:
+      energy: 1.0
+      synergy: 0.0
+      jerk: 0.4
+    alive_reward:
+      reward: 1.0
+      fallen_reward: 0.0
+      pelvis_height_range: [0.55, 1.5]
+      use_terrain_relative_height: false
+    goal_weights:
+      position: 0.0
+      speed: 1.0
+    goal_reward:
+      target_speed: null
+      speed_sigma: 0.5
+      lateral_speed_sigma: 0.35
+      speed_direction: command
+
+train:
+  num_steps_per_env: 600
+  num_learning_iterations: 3000
+  empirical_normalization: true
+  # Keep pretrained proprioception statistics. New bounded command features
+  # start with mean=0 and std=1.
+  preserve_normalizer_count_on_resize: true
+  save_interval: 100
+  experiment_name: humanoid_walk_run1
+  run_name: walk_run_1p4_2p8
+  logger: wandb
+  wandb_project: MS_RL_humanoid
+  load_optimizer: false
+  algorithm:
+    class_name: PPO
+    value_loss_coef: 0.5
+    clip_param: 0.2
+    use_clipped_value_loss: true
+    desired_kl: 0.01
+    entropy_coef: 0.0
+    gamma: 0.99
+    lam: 0.95
+    max_grad_norm: 1.0
+    learning_rate: 2.0e-5
+    num_learning_epochs: 4
+    num_mini_batches: 8
+    schedule: adaptive
+  policy:
+    class_name: ActorCritic
+    activation: elu
+    actor_hidden_dims: [2048, 1024, 512, 256]
+    critic_hidden_dims: [2048, 1024, 512, 256]
+    terrain_cnn_enabled: false
+    zero_initialize_added_observations: true
+  discriminator:
+    use: false
+
+seed: 0
+device: cuda
+log_dir: logs/humanoid_walk_run
+resume_path: logs\humanoid_walk_run\model_best.pt

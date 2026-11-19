@@ -74,6 +74,7 @@ class ActorCritic(nn.Module):
         terrain_patch_shape=None,
         terrain_feature_dim: int = 64,
         terrain_attention_enabled: bool = False,
+        zero_initialize_added_observations: bool = False,
         **kwargs,
     ):
     
@@ -86,6 +87,7 @@ class ActorCritic(nn.Module):
         activation = resolve_nn_activation(activation)
 
         self.terrain_cnn_enabled = bool(terrain_cnn_enabled)
+        self.zero_initialize_added_observations = bool(zero_initialize_added_observations)
         self.terrain_patch_shape = tuple(terrain_patch_shape or (0, 0))
         self.terrain_obs_dim = int(self.terrain_patch_shape[0] * self.terrain_patch_shape[1])
         self.terrain_feature_dim = int(terrain_feature_dim)
@@ -269,6 +271,8 @@ class ActorCritic(nn.Module):
                 adapted_state[key] = value
             elif key == "backbone.0.weight" and value.ndim == 2 and target.ndim == 2:
                 copied = target.clone()
+                if self.zero_initialize_added_observations:
+                    copied.zero_()
                 rows = min(copied.shape[0], value.shape[0])
                 cols = min(copied.shape[1], value.shape[1])
                 copied[:rows, :cols] = value[:rows, :cols]
@@ -278,6 +282,8 @@ class ActorCritic(nn.Module):
                 )
             elif key == "critic.0.weight" and value.ndim == 2 and target.ndim == 2:
                 copied = target.clone()
+                if self.zero_initialize_added_observations:
+                    copied.zero_()
                 rows = min(copied.shape[0], value.shape[0])
                 cols = min(copied.shape[1], value.shape[1])
                 copied[:rows, :cols] = value[:rows, :cols]

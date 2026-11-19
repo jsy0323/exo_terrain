@@ -1,7 +1,8 @@
 # Visualization configuration
 
 env:
-  model_path: Env/MFG_Musculoskelet_V11/MFG_Raj2015_V11_fixed_stairs_exo.xml
+  training_config: configs/humanoid_walk_run.yaml
+  model_path: Env/MFG_Musculoskelet_V11/MFG_Raj2015_V11.xml
 
   id: "MFG_MS_V11"  # MuJoCo environment ID
 
@@ -15,19 +16,19 @@ env:
 
 policy:
 
-  checkpoint: "logs/exo_terrain_at/model_best1.pt"  # Path to the trained policy checkpoint
+  checkpoint: "logs/humanoid_walk_run/model_best.pt"  # Path to the trained policy checkpoint
 
   activation: "elu"
 
   hidden_dims: [2048, 1024, 512, 256]
 
-  terrain_cnn_enabled: true
+  terrain_cnn_enabled: false
 
   terrain_patch_shape: [20, 30]
 
   terrain_feature_dim: 81
 
-  terrain_attention_enabled: true
+  terrain_attention_enabled: false
 
   muscle_action_dim: 80
 

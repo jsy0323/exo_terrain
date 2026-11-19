@@ -1,0 +1,1264 @@
+{
+  "schema_version": 2,
+  "sample_rate_hz": 100,
+  "imu_names": [
+    "pelvis",
+    "thigh_l",
+    "thigh_r",
+    "shank_l",
+    "shank_r",
+    "foot_l",
+    "foot_r"
+  ],
+  "imu_fields": [
+    "gyro_xyz",
+    "specific_force_xyz",
+    "gravity_direction_xyz"
+  ],
+  "joint_names": [
+    "hip_flexion_l",
+    "hip_flexion_r",
+    "knee_angle_l",
+    "knee_angle_r",
+    "ankle_angle_l",
+    "ankle_angle_r"
+  ],
+  "extra_names": [
+    "hip_angle_l",
+    "hip_angle_r",
+    "hip_velocity_l",
+    "hip_velocity_r",
+    "fsr_heel_l",
+    "fsr_toe_l",
+    "fsr_heel_r",
+    "fsr_toe_r",
+    "fsr_rate_heel_l",
+    "fsr_rate_toe_l",
+    "fsr_rate_heel_r",
+    "fsr_rate_toe_r",
+    "fsr_sum_l",
+    "fsr_sum_r",
+    "toe_ratio_l",
+    "toe_ratio_r",
+    "fsr_contact_l",
+    "fsr_contact_r",
+    "inclination_thigh_l",
+    "inclination_thigh_r",
+    "inclination_shank_l",
+    "inclination_shank_r",
+    "inclination_foot_l",
+    "inclination_foot_r",
+    "sagittal_gyro_thigh_l",
+    "sagittal_gyro_thigh_r",
+    "sagittal_gyro_shank_l",
+    "sagittal_gyro_shank_r",
+    "sagittal_gyro_foot_l",
+    "sagittal_gyro_foot_r",
+    "knee_angle_proxy_l",
+    "knee_angle_proxy_r",
+    "ankle_angle_proxy_l",
+    "ankle_angle_proxy_r",
+    "hip_acceleration_l",
+    "hip_acceleration_r",
+    "fsr_bw_l",
+    "fsr_bw_r",
+    "hip_moment_proxy_l",
+    "hip_moment_proxy_r",
+    "hip_sine_l",
+    "hip_sine_r",
+    "mass_kg",
+    "height_m",
+    "thigh_length_m",
+    "shank_length_m",
+    "foot_length_m",
+    "valid_pelvis",
+    "valid_thigh_l",
+    "valid_thigh_r",
+    "valid_shank_l",
+    "valid_shank_r",
+    "valid_foot_l",
+    "valid_foot_r"
+  ],
+  "torque_units": "N m",
+  "grf_units": "N",
+  "joint_sign": "positive along MJCF joint axis",
+  "torque_formula": "M(q) @ qacc + qfrc_bias - qfrc_constraint",
+  "bio_formula": "tau_total - known_applied_joint_moment",
+  "assistance": "ideal_joint_torque_source",
+  "gravity_source": "ahrs",
+  "processing": {
+    "anti_alias_hz": 30.0,
+    "gravity_source": "ahrs",
+    "warmup_s": 2.0,
+    "fsr_calibration": "bench",
+    "calibration_noise_std": 0.002,
+    "ahrs": {
+      "gain": 1.0,
+      "startup_s": 2.0,
+      "acceleration_tolerance_mps2": 2.0,
+      "rejection_deg": 35.0
+    }
+  },
+  "subject_count": 6,
+  "geometry_variants": 1,
+  "mujoco_version": "3.11.0",
+  "requested_duration_s": 12.0,
+  "config": {
+    "collection": {
+      "visualization_config": "configs/visualize.yaml",
+      "checkpoint": "logs/humanoid_walk_run/model_best.pt",
+      "output_dir": "data/force_estimation_sim_v2_calibrated",
+      "episodes": 48,
+      "duration_s": 12.0,
+      "minimum_duration_fraction": 0.95,
+      "seed": 20261118
+    },
+    "sample_rate_hz": 100,
+    "window_s": 1.0,
+    "contact_threshold_n": 20.0,
+    "subject": {
+      "height_m": 1.75,
+      "thigh_length_m": 0.42,
+      "shank_length_m": 0.43,
+      "foot_length_m": 0.26
+    },
+    "preprocessing": {
+      "anti_alias_hz": 30.0,
+      "gravity_source": "ahrs",
+      "warmup_s": 2.0,
+      "fsr_calibration": "bench",
+      "calibration_noise_std": 0.002,
+      "ahrs": {
+        "gain": 1.0,
+        "startup_s": 2.0,
+        "acceleration_tolerance_mps2": 2.0,
+        "rejection_deg": 35.0
+      }
+    },
+    "imu": {
+      "position_offset_m": 0.02,
+      "angle_offset_deg": 5.0,
+      "gyro_noise_std": 0.02,
+      "gyro_bias": 0.02,
+      "acc_noise_std": 0.05,
+      "acc_bias": 0.1,
+      "vibration_hz": [
+        5.0,
+        15.0
+      ],
+      "vibration_max_mps2": 0.3,
+      "delay_ms": [
+        0.0,
+        5.0
+      ],
+      "dropout_probability": 0.02,
+      "dropout_burst_rate_hz": 0.03,
+      "dropout_burst_s": [
+        0.1,
+        0.3
+      ]
+    },
+    "encoder": {
+      "quantization_rad": 0.001,
+      "noise_std_rad": 0.002,
+      "cutoff_hz": 30.0
+    },
+    "fsr": {
+      "deadzone": [
+        0.0,
+        20.0
+      ],
+      "gain": [
+        0.7,
+        1.3
+      ],
+      "alpha": [
+        0.7,
+        1.3
+      ],
+      "f_sat": [
+        400.0,
+        1200.0
+      ],
+      "lag_coef": [
+        0.3,
+        1.0
+      ],
+      "creep": [
+        0.0,
+        0.0001
+      ],
+      "bias": [
+        -0.02,
+        0.02
+      ],
+      "sigma": 0.01,
+      "boundary_offset_m": 0.015,
+      "calibration_value": 500.0,
+      "control_dt_s": 0.02
+    },
+    "experiments": {
+      "repeats": 2,
+      "torque_limit_nm": 4.0,
+      "torque_slew_nm_s": 40.0,
+      "subjects": [
+        {
+          "id": "mass_094",
+          "mass_scale": 0.94
+        },
+        {
+          "id": "mass_097",
+          "mass_scale": 0.97
+        },
+        {
+          "id": "mass_100",
+          "mass_scale": 1.0
+        },
+        {
+          "id": "mass_103",
+          "mass_scale": 1.03
+        },
+        {
+          "id": "mass_106",
+          "mass_scale": 1.06
+        },
+        {
+          "id": "mass_109",
+          "mass_scale": 1.09
+        }
+      ],
+      "motions": [
+        {
+          "id": "steady",
+          "start_speed": 1.3,
+          "end_speed": 1.3,
+          "hold_seconds": 2.0,
+          "acceleration_range": [
+            0.3,
+            0.6
+          ]
+        },
+        {
+          "id": "acceleration",
+          "start_speed": 1.15,
+          "end_speed": 1.75,
+          "hold_seconds": 2.0,
+          "acceleration_range": [
+            0.3,
+            0.6
+          ]
+        },
+        {
+          "id": "deceleration",
+          "start_speed": 1.65,
+          "end_speed": 1.15,
+          "hold_seconds": 2.0,
+          "acceleration_range": [
+            0.3,
+            0.6
+          ]
+        },
+        {
+          "id": "hip_perturbation",
+          "start_speed": 1.3,
+          "end_speed": 1.3,
+          "hold_seconds": 2.0,
+          "acceleration_range": [
+            0.3,
+            0.6
+          ],
+          "hip_torque_amplitude_nm": 2.5,
+          "hip_torque_frequency_hz": 0.8
+        }
+      ]
+    },
+    "training": {
+      "include_exo_features": false,
+      "target": "total",
+      "output_dir": "models/force_estimator_sim_v2",
+      "epochs": 45,
+      "batch_size": 64,
+      "stride_samples": 10,
+      "learning_rate": 0.0003,
+      "validation_fraction": 0.2,
+      "test_fraction": 0.2,
+      "group_by": "subject_id",
+      "validation_groups": [
+        "mass_097"
+      ],
+      "test_groups": [
+        "mass_109"
+      ],
+      "peak_weight": 1.0,
+      "calibrate_uncertainty": true,
+      "seed": 42,
+      "device": "cuda",
+      "dropout": 0.1,
+      "torque_scale_nm": 50.0,
+      "grf_scale_n": 750.0
+    }
+  },
+  "episodes": [
+    {
+      "file": "episode_00000.npz",
+      "seed": 20261118,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_094",
+      "motion_id": "steady",
+      "session_id": "mass_094/steady/0",
+      "mass_scale": 0.94,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.9335745573043823,
+        "speed_mean_mps": 1.3187963962554932,
+        "speed_max_mps": 1.8191975355148315,
+        "tracking_rmse_mps": 0.15228670835494995,
+        "both_feet_below_contact_threshold_fraction": 0.0025,
+        "imu_available_fraction": 0.9970238095238095
+      }
+    },
+    {
+      "file": "episode_00001.npz",
+      "seed": 20261119,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_094",
+      "motion_id": "steady",
+      "session_id": "mass_094/steady/1",
+      "mass_scale": 0.94,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.9685114622116089,
+        "speed_mean_mps": 1.3163988590240479,
+        "speed_max_mps": 1.8118855953216553,
+        "tracking_rmse_mps": 0.14919297397136688,
+        "both_feet_below_contact_threshold_fraction": 0.005,
+        "imu_available_fraction": 0.9922619047619048
+      }
+    },
+    {
+      "file": "episode_00002.npz",
+      "seed": 20261120,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_094",
+      "motion_id": "acceleration",
+      "session_id": "mass_094/acceleration/0",
+      "mass_scale": 0.94,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 1.0000112056732178,
+        "speed_mean_mps": 1.3153053522109985,
+        "speed_max_mps": 1.804223895072937,
+        "tracking_rmse_mps": 0.4183536469936371,
+        "both_feet_below_contact_threshold_fraction": 0.0016666666666666668,
+        "imu_available_fraction": 0.9983333333333333
+      }
+    },
+    {
+      "file": "episode_00003.npz",
+      "seed": 20261121,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_094",
+      "motion_id": "acceleration",
+      "session_id": "mass_094/acceleration/1",
+      "mass_scale": 0.94,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.9630511999130249,
+        "speed_mean_mps": 1.3148854970932007,
+        "speed_max_mps": 1.7826917171478271,
+        "tracking_rmse_mps": 0.42216190695762634,
+        "both_feet_below_contact_threshold_fraction": 0.0025,
+        "imu_available_fraction": 0.9954761904761905
+      }
+    },
+    {
+      "file": "episode_00004.npz",
+      "seed": 20261122,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_094",
+      "motion_id": "deceleration",
+      "session_id": "mass_094/deceleration/0",
+      "mass_scale": 0.94,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.9577166438102722,
+        "speed_mean_mps": 1.3188871145248413,
+        "speed_max_mps": 1.8039073944091797,
+        "tracking_rmse_mps": 0.2517605423927307,
+        "both_feet_below_contact_threshold_fraction": 0.0008333333333333334,
+        "imu_available_fraction": 0.9904761904761905
+      }
+    },
+    {
+      "file": "episode_00005.npz",
+      "seed": 20261123,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_094",
+      "motion_id": "deceleration",
+      "session_id": "mass_094/deceleration/1",
+      "mass_scale": 0.94,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.9934816360473633,
+        "speed_mean_mps": 1.3181003332138062,
+        "speed_max_mps": 1.786507487297058,
+        "tracking_rmse_mps": 0.2497248649597168,
+        "both_feet_below_contact_threshold_fraction": 0.0025,
+        "imu_available_fraction": 0.996547619047619
+      }
+    },
+    {
+      "file": "episode_00006.npz",
+      "seed": 20261124,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_094",
+      "motion_id": "hip_perturbation",
+      "session_id": "mass_094/hip_perturbation/0",
+      "mass_scale": 0.94,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.9571636915206909,
+        "speed_mean_mps": 1.3194358348846436,
+        "speed_max_mps": 1.8243669271469116,
+        "tracking_rmse_mps": 0.15473167598247528,
+        "both_feet_below_contact_threshold_fraction": 0.0016666666666666668,
+        "imu_available_fraction": 0.996547619047619
+      }
+    },
+    {
+      "file": "episode_00007.npz",
+      "seed": 20261125,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_094",
+      "motion_id": "hip_perturbation",
+      "session_id": "mass_094/hip_perturbation/1",
+      "mass_scale": 0.94,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.999739408493042,
+        "speed_mean_mps": 1.3180556297302246,
+        "speed_max_mps": 1.802114486694336,
+        "tracking_rmse_mps": 0.15295520424842834,
+        "both_feet_below_contact_threshold_fraction": 0.0025,
+        "imu_available_fraction": 0.9986904761904762
+      }
+    },
+    {
+      "file": "episode_00008.npz",
+      "seed": 20261126,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_097",
+      "motion_id": "steady",
+      "session_id": "mass_097/steady/0",
+      "mass_scale": 0.97,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.9732995629310608,
+        "speed_mean_mps": 1.3200427293777466,
+        "speed_max_mps": 1.7757985591888428,
+        "tracking_rmse_mps": 0.14684255421161652,
+        "both_feet_below_contact_threshold_fraction": 0.0016666666666666668,
+        "imu_available_fraction": 0.9959523809523809
+      }
+    },
+    {
+      "file": "episode_00009.npz",
+      "seed": 20261127,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_097",
+      "motion_id": "steady",
+      "session_id": "mass_097/steady/1",
+      "mass_scale": 0.97,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.9730973839759827,
+        "speed_mean_mps": 1.3190327882766724,
+        "speed_max_mps": 1.779848337173462,
+        "tracking_rmse_mps": 0.1532718390226364,
+        "both_feet_below_contact_threshold_fraction": 0.0025,
+        "imu_available_fraction": 1.0
+      }
+    },
+    {
+      "file": "episode_00010.npz",
+      "seed": 20261128,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_097",
+      "motion_id": "acceleration",
+      "session_id": "mass_097/acceleration/0",
+      "mass_scale": 0.97,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 1.0155467987060547,
+        "speed_mean_mps": 1.3191559314727783,
+        "speed_max_mps": 1.7622475624084473,
+        "tracking_rmse_mps": 0.4147668480873108,
+        "both_feet_below_contact_threshold_fraction": 0.0016666666666666668,
+        "imu_available_fraction": 0.991904761904762
+      }
+    },
+    {
+      "file": "episode_00011.npz",
+      "seed": 20261129,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_097",
+      "motion_id": "acceleration",
+      "session_id": "mass_097/acceleration/1",
+      "mass_scale": 0.97,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 1.018847107887268,
+        "speed_mean_mps": 1.3119102716445923,
+        "speed_max_mps": 1.7684818506240845,
+        "tracking_rmse_mps": 0.413272887468338,
+        "both_feet_below_contact_threshold_fraction": 0.005,
+        "imu_available_fraction": 0.9970238095238095
+      }
+    },
+    {
+      "file": "episode_00012.npz",
+      "seed": 20261130,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_097",
+      "motion_id": "deceleration",
+      "session_id": "mass_097/deceleration/0",
+      "mass_scale": 0.97,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.98119056224823,
+        "speed_mean_mps": 1.317755937576294,
+        "speed_max_mps": 1.8053884506225586,
+        "tracking_rmse_mps": 0.2495928704738617,
+        "both_feet_below_contact_threshold_fraction": 0.0016666666666666668,
+        "imu_available_fraction": 0.9848809523809524
+      }
+    },
+    {
+      "file": "episode_00013.npz",
+      "seed": 20261131,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_097",
+      "motion_id": "deceleration",
+      "session_id": "mass_097/deceleration/1",
+      "mass_scale": 0.97,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.9871030449867249,
+        "speed_mean_mps": 1.3170298337936401,
+        "speed_max_mps": 1.7937140464782715,
+        "tracking_rmse_mps": 0.2476118803024292,
+        "both_feet_below_contact_threshold_fraction": 0.005,
+        "imu_available_fraction": 0.9979761904761905
+      }
+    },
+    {
+      "file": "episode_00014.npz",
+      "seed": 20261132,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_097",
+      "motion_id": "hip_perturbation",
+      "session_id": "mass_097/hip_perturbation/0",
+      "mass_scale": 0.97,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.9732277989387512,
+        "speed_mean_mps": 1.3189210891723633,
+        "speed_max_mps": 1.7891780138015747,
+        "tracking_rmse_mps": 0.160530686378479,
+        "both_feet_below_contact_threshold_fraction": 0.0008333333333333334,
+        "imu_available_fraction": 0.9914285714285714
+      }
+    },
+    {
+      "file": "episode_00015.npz",
+      "seed": 20261133,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_097",
+      "motion_id": "hip_perturbation",
+      "session_id": "mass_097/hip_perturbation/1",
+      "mass_scale": 0.97,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.987127423286438,
+        "speed_mean_mps": 1.3181124925613403,
+        "speed_max_mps": 1.7813575267791748,
+        "tracking_rmse_mps": 0.15222403407096863,
+        "both_feet_below_contact_threshold_fraction": 0.0016666666666666668,
+        "imu_available_fraction": 0.8539285714285715
+      }
+    },
+    {
+      "file": "episode_00016.npz",
+      "seed": 20261134,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_100",
+      "motion_id": "steady",
+      "session_id": "mass_100/steady/0",
+      "mass_scale": 1.0,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 1.0148656368255615,
+        "speed_mean_mps": 1.3116507530212402,
+        "speed_max_mps": 1.765655755996704,
+        "tracking_rmse_mps": 0.15047650039196014,
+        "both_feet_below_contact_threshold_fraction": 0.005,
+        "imu_available_fraction": 0.9947619047619047
+      }
+    },
+    {
+      "file": "episode_00017.npz",
+      "seed": 20261135,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_100",
+      "motion_id": "steady",
+      "session_id": "mass_100/steady/1",
+      "mass_scale": 1.0,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 1.012871265411377,
+        "speed_mean_mps": 1.3190675973892212,
+        "speed_max_mps": 1.7697808742523193,
+        "tracking_rmse_mps": 0.15096494555473328,
+        "both_feet_below_contact_threshold_fraction": 0.0025,
+        "imu_available_fraction": 0.9946428571428572
+      }
+    },
+    {
+      "file": "episode_00018.npz",
+      "seed": 20261136,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_100",
+      "motion_id": "acceleration",
+      "session_id": "mass_100/acceleration/0",
+      "mass_scale": 1.0,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.9733750224113464,
+        "speed_mean_mps": 1.3128862380981445,
+        "speed_max_mps": 1.7866023778915405,
+        "tracking_rmse_mps": 0.4096008539199829,
+        "both_feet_below_contact_threshold_fraction": 0.005833333333333334,
+        "imu_available_fraction": 0.986904761904762
+      }
+    },
+    {
+      "file": "episode_00019.npz",
+      "seed": 20261137,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_100",
+      "motion_id": "acceleration",
+      "session_id": "mass_100/acceleration/1",
+      "mass_scale": 1.0,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.9649396538734436,
+        "speed_mean_mps": 1.3202095031738281,
+        "speed_max_mps": 1.7828409671783447,
+        "tracking_rmse_mps": 0.41407331824302673,
+        "both_feet_below_contact_threshold_fraction": 0.0016666666666666668,
+        "imu_available_fraction": 0.9939285714285714
+      }
+    },
+    {
+      "file": "episode_00020.npz",
+      "seed": 20261138,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_100",
+      "motion_id": "deceleration",
+      "session_id": "mass_100/deceleration/0",
+      "mass_scale": 1.0,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 1.007630705833435,
+        "speed_mean_mps": 1.3185142278671265,
+        "speed_max_mps": 1.7749238014221191,
+        "tracking_rmse_mps": 0.25107041001319885,
+        "both_feet_below_contact_threshold_fraction": 0.0008333333333333334,
+        "imu_available_fraction": 0.9982142857142857
+      }
+    },
+    {
+      "file": "episode_00021.npz",
+      "seed": 20261139,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_100",
+      "motion_id": "deceleration",
+      "session_id": "mass_100/deceleration/1",
+      "mass_scale": 1.0,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.9916332960128784,
+        "speed_mean_mps": 1.319388508796692,
+        "speed_max_mps": 1.7654368877410889,
+        "tracking_rmse_mps": 0.24826155602931976,
+        "both_feet_below_contact_threshold_fraction": 0.0016666666666666668,
+        "imu_available_fraction": 1.0
+      }
+    },
+    {
+      "file": "episode_00022.npz",
+      "seed": 20261140,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_100",
+      "motion_id": "hip_perturbation",
+      "session_id": "mass_100/hip_perturbation/0",
+      "mass_scale": 1.0,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.9967710375785828,
+        "speed_mean_mps": 1.3164324760437012,
+        "speed_max_mps": 1.7918000221252441,
+        "tracking_rmse_mps": 0.15057474374771118,
+        "both_feet_below_contact_threshold_fraction": 0.0016666666666666668,
+        "imu_available_fraction": 1.0
+      }
+    },
+    {
+      "file": "episode_00023.npz",
+      "seed": 20261141,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_100",
+      "motion_id": "hip_perturbation",
+      "session_id": "mass_100/hip_perturbation/1",
+      "mass_scale": 1.0,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.9711312651634216,
+        "speed_mean_mps": 1.3197197914123535,
+        "speed_max_mps": 1.7744451761245728,
+        "tracking_rmse_mps": 0.14991150796413422,
+        "both_feet_below_contact_threshold_fraction": 0.0016666666666666668,
+        "imu_available_fraction": 0.9938095238095238
+      }
+    },
+    {
+      "file": "episode_00024.npz",
+      "seed": 20261142,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_103",
+      "motion_id": "steady",
+      "session_id": "mass_103/steady/0",
+      "mass_scale": 1.03,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.9529760479927063,
+        "speed_mean_mps": 1.3125920295715332,
+        "speed_max_mps": 1.7761495113372803,
+        "tracking_rmse_mps": 0.15194234251976013,
+        "both_feet_below_contact_threshold_fraction": 0.005833333333333334,
+        "imu_available_fraction": 0.993452380952381
+      }
+    },
+    {
+      "file": "episode_00025.npz",
+      "seed": 20261143,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_103",
+      "motion_id": "steady",
+      "session_id": "mass_103/steady/1",
+      "mass_scale": 1.03,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 1.0268046855926514,
+        "speed_mean_mps": 1.3157459497451782,
+        "speed_max_mps": 1.7561167478561401,
+        "tracking_rmse_mps": 0.15437854826450348,
+        "both_feet_below_contact_threshold_fraction": 0.0016666666666666668,
+        "imu_available_fraction": 1.0
+      }
+    },
+    {
+      "file": "episode_00026.npz",
+      "seed": 20261144,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_103",
+      "motion_id": "acceleration",
+      "session_id": "mass_103/acceleration/0",
+      "mass_scale": 1.03,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.976343035697937,
+        "speed_mean_mps": 1.3185100555419922,
+        "speed_max_mps": 1.7718098163604736,
+        "tracking_rmse_mps": 0.41819337010383606,
+        "both_feet_below_contact_threshold_fraction": 0.0016666666666666668,
+        "imu_available_fraction": 0.8508333333333333
+      }
+    },
+    {
+      "file": "episode_00027.npz",
+      "seed": 20261145,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_103",
+      "motion_id": "acceleration",
+      "session_id": "mass_103/acceleration/1",
+      "mass_scale": 1.03,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.996584951877594,
+        "speed_mean_mps": 1.3191531896591187,
+        "speed_max_mps": 1.7659616470336914,
+        "tracking_rmse_mps": 0.41554635763168335,
+        "both_feet_below_contact_threshold_fraction": 0.0016666666666666668,
+        "imu_available_fraction": 0.9922619047619048
+      }
+    },
+    {
+      "file": "episode_00028.npz",
+      "seed": 20261146,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_103",
+      "motion_id": "deceleration",
+      "session_id": "mass_103/deceleration/0",
+      "mass_scale": 1.03,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 1.0264931917190552,
+        "speed_mean_mps": 1.3148553371429443,
+        "speed_max_mps": 1.7878462076187134,
+        "tracking_rmse_mps": 0.246449813246727,
+        "both_feet_below_contact_threshold_fraction": 0.004166666666666667,
+        "imu_available_fraction": 0.8507142857142858
+      }
+    },
+    {
+      "file": "episode_00029.npz",
+      "seed": 20261147,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_103",
+      "motion_id": "deceleration",
+      "session_id": "mass_103/deceleration/1",
+      "mass_scale": 1.03,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.982258677482605,
+        "speed_mean_mps": 1.3166390657424927,
+        "speed_max_mps": 1.779634952545166,
+        "tracking_rmse_mps": 0.2513713836669922,
+        "both_feet_below_contact_threshold_fraction": 0.0025,
+        "imu_available_fraction": 0.9878571428571429
+      }
+    },
+    {
+      "file": "episode_00030.npz",
+      "seed": 20261148,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_103",
+      "motion_id": "hip_perturbation",
+      "session_id": "mass_103/hip_perturbation/0",
+      "mass_scale": 1.03,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.9344154596328735,
+        "speed_mean_mps": 1.3187280893325806,
+        "speed_max_mps": 1.761122703552246,
+        "tracking_rmse_mps": 0.15877921879291534,
+        "both_feet_below_contact_threshold_fraction": 0.0016666666666666668,
+        "imu_available_fraction": 0.8571428571428571
+      }
+    },
+    {
+      "file": "episode_00031.npz",
+      "seed": 20261149,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_103",
+      "motion_id": "hip_perturbation",
+      "session_id": "mass_103/hip_perturbation/1",
+      "mass_scale": 1.03,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.9570590853691101,
+        "speed_mean_mps": 1.318220853805542,
+        "speed_max_mps": 1.7927943468093872,
+        "tracking_rmse_mps": 0.15712682902812958,
+        "both_feet_below_contact_threshold_fraction": 0.0025,
+        "imu_available_fraction": 0.996547619047619
+      }
+    },
+    {
+      "file": "episode_00032.npz",
+      "seed": 20261150,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_106",
+      "motion_id": "steady",
+      "session_id": "mass_106/steady/0",
+      "mass_scale": 1.06,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.9731804132461548,
+        "speed_mean_mps": 1.319044828414917,
+        "speed_max_mps": 1.7771646976470947,
+        "tracking_rmse_mps": 0.1595802903175354,
+        "both_feet_below_contact_threshold_fraction": 0.0025,
+        "imu_available_fraction": 0.9979761904761905
+      }
+    },
+    {
+      "file": "episode_00033.npz",
+      "seed": 20261151,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_106",
+      "motion_id": "steady",
+      "session_id": "mass_106/steady/1",
+      "mass_scale": 1.06,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 1.0506681203842163,
+        "speed_mean_mps": 1.3181287050247192,
+        "speed_max_mps": 1.7867467403411865,
+        "tracking_rmse_mps": 0.1579935997724533,
+        "both_feet_below_contact_threshold_fraction": 0.0025,
+        "imu_available_fraction": 0.8544047619047619
+      }
+    },
+    {
+      "file": "episode_00034.npz",
+      "seed": 20261152,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_106",
+      "motion_id": "acceleration",
+      "session_id": "mass_106/acceleration/0",
+      "mass_scale": 1.06,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 1.0156186819076538,
+        "speed_mean_mps": 1.319406270980835,
+        "speed_max_mps": 1.7464587688446045,
+        "tracking_rmse_mps": 0.4160744249820709,
+        "both_feet_below_contact_threshold_fraction": 0.0016666666666666668,
+        "imu_available_fraction": 0.9892857142857143
+      }
+    },
+    {
+      "file": "episode_00035.npz",
+      "seed": 20261153,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_106",
+      "motion_id": "acceleration",
+      "session_id": "mass_106/acceleration/1",
+      "mass_scale": 1.06,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 1.0157029628753662,
+        "speed_mean_mps": 1.3175128698349,
+        "speed_max_mps": 1.7311689853668213,
+        "tracking_rmse_mps": 0.41845524311065674,
+        "both_feet_below_contact_threshold_fraction": 0.0016666666666666668,
+        "imu_available_fraction": 0.9873809523809524
+      }
+    },
+    {
+      "file": "episode_00036.npz",
+      "seed": 20261154,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_106",
+      "motion_id": "deceleration",
+      "session_id": "mass_106/deceleration/0",
+      "mass_scale": 1.06,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 1.0308988094329834,
+        "speed_mean_mps": 1.3172800540924072,
+        "speed_max_mps": 1.7626699209213257,
+        "tracking_rmse_mps": 0.24968072772026062,
+        "both_feet_below_contact_threshold_fraction": 0.0033333333333333335,
+        "imu_available_fraction": 0.9957142857142857
+      }
+    },
+    {
+      "file": "episode_00037.npz",
+      "seed": 20261155,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_106",
+      "motion_id": "deceleration",
+      "session_id": "mass_106/deceleration/1",
+      "mass_scale": 1.06,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 1.0254541635513306,
+        "speed_mean_mps": 1.3180863857269287,
+        "speed_max_mps": 1.765382170677185,
+        "tracking_rmse_mps": 0.25340843200683594,
+        "both_feet_below_contact_threshold_fraction": 0.0008333333333333334,
+        "imu_available_fraction": 0.845
+      }
+    },
+    {
+      "file": "episode_00038.npz",
+      "seed": 20261156,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_106",
+      "motion_id": "hip_perturbation",
+      "session_id": "mass_106/hip_perturbation/0",
+      "mass_scale": 1.06,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.9880743622779846,
+        "speed_mean_mps": 1.3191053867340088,
+        "speed_max_mps": 1.787488341331482,
+        "tracking_rmse_mps": 0.15317226946353912,
+        "both_feet_below_contact_threshold_fraction": 0.0016666666666666668,
+        "imu_available_fraction": 0.9978571428571429
+      }
+    },
+    {
+      "file": "episode_00039.npz",
+      "seed": 20261157,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_106",
+      "motion_id": "hip_perturbation",
+      "session_id": "mass_106/hip_perturbation/1",
+      "mass_scale": 1.06,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 1.008772850036621,
+        "speed_mean_mps": 1.316890001296997,
+        "speed_max_mps": 1.7493369579315186,
+        "tracking_rmse_mps": 0.1539207100868225,
+        "both_feet_below_contact_threshold_fraction": 0.0016666666666666668,
+        "imu_available_fraction": 0.9951190476190476
+      }
+    },
+    {
+      "file": "episode_00040.npz",
+      "seed": 20261158,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_109",
+      "motion_id": "steady",
+      "session_id": "mass_109/steady/0",
+      "mass_scale": 1.09,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 1.010985016822815,
+        "speed_mean_mps": 1.3182787895202637,
+        "speed_max_mps": 1.7876496315002441,
+        "tracking_rmse_mps": 0.16159814596176147,
+        "both_feet_below_contact_threshold_fraction": 0.0008333333333333334,
+        "imu_available_fraction": 0.9972619047619048
+      }
+    },
+    {
+      "file": "episode_00041.npz",
+      "seed": 20261159,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_109",
+      "motion_id": "steady",
+      "session_id": "mass_109/steady/1",
+      "mass_scale": 1.09,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 1.032942295074463,
+        "speed_mean_mps": 1.3105312585830688,
+        "speed_max_mps": 1.767246961593628,
+        "tracking_rmse_mps": 0.1545933336019516,
+        "both_feet_below_contact_threshold_fraction": 0.005833333333333334,
+        "imu_available_fraction": 0.9945238095238095
+      }
+    },
+    {
+      "file": "episode_00042.npz",
+      "seed": 20261160,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_109",
+      "motion_id": "acceleration",
+      "session_id": "mass_109/acceleration/0",
+      "mass_scale": 1.09,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 1.0294095277786255,
+        "speed_mean_mps": 1.3164294958114624,
+        "speed_max_mps": 1.7647901773452759,
+        "tracking_rmse_mps": 0.4164893627166748,
+        "both_feet_below_contact_threshold_fraction": 0.0033333333333333335,
+        "imu_available_fraction": 0.9951190476190476
+      }
+    },
+    {
+      "file": "episode_00043.npz",
+      "seed": 20261161,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_109",
+      "motion_id": "acceleration",
+      "session_id": "mass_109/acceleration/1",
+      "mass_scale": 1.09,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 1.0367313623428345,
+        "speed_mean_mps": 1.3167588710784912,
+        "speed_max_mps": 1.795767068862915,
+        "tracking_rmse_mps": 0.4160141944885254,
+        "both_feet_below_contact_threshold_fraction": 0.0025,
+        "imu_available_fraction": 0.9985714285714286
+      }
+    },
+    {
+      "file": "episode_00044.npz",
+      "seed": 20261162,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_109",
+      "motion_id": "deceleration",
+      "session_id": "mass_109/deceleration/0",
+      "mass_scale": 1.09,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 1.0287628173828125,
+        "speed_mean_mps": 1.316867470741272,
+        "speed_max_mps": 1.7480478286743164,
+        "tracking_rmse_mps": 0.2530456781387329,
+        "both_feet_below_contact_threshold_fraction": 0.0033333333333333335,
+        "imu_available_fraction": 1.0
+      }
+    },
+    {
+      "file": "episode_00045.npz",
+      "seed": 20261163,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_109",
+      "motion_id": "deceleration",
+      "session_id": "mass_109/deceleration/1",
+      "mass_scale": 1.09,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.9956827759742737,
+        "speed_mean_mps": 1.3186103105545044,
+        "speed_max_mps": 1.7795037031173706,
+        "tracking_rmse_mps": 0.25135862827301025,
+        "both_feet_below_contact_threshold_fraction": 0.0025,
+        "imu_available_fraction": 0.9927380952380952
+      }
+    },
+    {
+      "file": "episode_00046.npz",
+      "seed": 20261164,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_109",
+      "motion_id": "hip_perturbation",
+      "session_id": "mass_109/hip_perturbation/0",
+      "mass_scale": 1.09,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.9800088405609131,
+        "speed_mean_mps": 1.3169901371002197,
+        "speed_max_mps": 1.773250937461853,
+        "tracking_rmse_mps": 0.15989544987678528,
+        "both_feet_below_contact_threshold_fraction": 0.0025,
+        "imu_available_fraction": 0.9955952380952381
+      }
+    },
+    {
+      "file": "episode_00047.npz",
+      "seed": 20261165,
+      "samples": 1200,
+      "duration_s": 11.999999999998789,
+      "subject_id": "mass_109",
+      "motion_id": "hip_perturbation",
+      "session_id": "mass_109/hip_perturbation/1",
+      "mass_scale": 1.09,
+      "geometry_scale": 1.0,
+      "accepted": true,
+      "coverage": {
+        "speed_min_mps": 0.8006101250648499,
+        "speed_mean_mps": 1.3101990222930908,
+        "speed_max_mps": 1.8566826581954956,
+        "tracking_rmse_mps": 0.1895865797996521,
+        "both_feet_below_contact_threshold_fraction": 0.005,
+        "imu_available_fraction": 0.8554761904761905
+      }
+    }
+  ],
+  "policy_sha256": "7f0b7e64a24a0c14836c19f258599f519a4f9f84ac51424fdad819df9a74bf25"
+}

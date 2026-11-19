@@ -32,6 +32,7 @@ from .common_utils import (
 from .state import get_state, get_state_size
 from .reward import compute_reward
 from .termination import check_termination
+from .speed_command import SpeedCommand
 
 logger = logging.getLogger(__name__)
 if not logger.handlers:
@@ -336,7 +337,8 @@ class MFG_Musculoskeletal_V11(MuJoCoEnv):
             increment=increment,
             max_hold_steps=max_hold,
             random_seed=rt_seed,
-            verbose=rt_verbose
+            verbose=rt_verbose,
+            loop=bool(config.get("loop_reference", False)),
         )
         self._update_frame_skip()
         
@@ -350,6 +352,11 @@ class MFG_Musculoskeletal_V11(MuJoCoEnv):
         if missing_rw:
             raise KeyError(f"Config['reward_weights'] missing keys: {sorted(missing_rw)}")
         self.reward_weights = {k: float(v) for k, v in rw.items()}
+        self.goal_weights = dict(config.get("goal_weights", {}) or {})
+        self.goal_reward = dict(config.get("goal_reward", {}) or {})
+        command_config = config.get("speed_command", {}) or {}
+        self.speed_command = SpeedCommand(command_config) if command_config.get("enabled", False) else None
+        self.speed_command_direction = self.DEFAULT_PELVIS_HEADING.copy()
         
         ## Sub‐weights for the imitation term
         iw = config.get("imitation_weights", {})
@@ -570,7 +577,8 @@ class MFG_Musculoskeletal_V11(MuJoCoEnv):
             if self.terrain_obs_enabled
             else 0
         )
-        self._obs_dim = base_dim + muscle_obs_dim + self._obs_terrain_dim + 4
+        self._obs_command_dim = 2 if self.speed_command is not None else 0
+        self._obs_dim = base_dim + muscle_obs_dim + self._obs_command_dim + self._obs_terrain_dim + 4
         obs_low   = np.full(self._obs_dim, -np.inf, dtype=np.float32)
         obs_high  = np.full(self._obs_dim, +np.inf, dtype=np.float32)
         if muscle_obs_dim > 0:
@@ -586,9 +594,13 @@ class MFG_Musculoskeletal_V11(MuJoCoEnv):
         # Precompute slices to avoid per-step arithmetic
         self._obs_base_slice = slice(4, 4 + base_dim)
         self._obs_muscle_slice = slice(self._obs_base_slice.stop, self._obs_base_slice.stop + muscle_obs_dim)
-        self._obs_terrain_slice = slice(
+        self._obs_command_slice = slice(
             self._obs_muscle_slice.stop,
-            self._obs_muscle_slice.stop + self._obs_terrain_dim,
+            self._obs_muscle_slice.stop + self._obs_command_dim,
+        )
+        self._obs_terrain_slice = slice(
+            self._obs_command_slice.stop,
+            self._obs_command_slice.stop + self._obs_terrain_dim,
         )
         if self._has_muscle_actuators:
             self._muscle_zero_buf = None
@@ -862,6 +874,8 @@ class MFG_Musculoskeletal_V11(MuJoCoEnv):
         terrain_slice = self._obs_terrain_slice
         if terrain_slice.stop > terrain_slice.start:
             obs_buf0[terrain_slice] = self._get_terrain_obs()
+        if self.speed_command is not None:
+            obs_buf0[self._obs_command_slice] = self.speed_command.observation()
     
         if validate and (not obs_space.contains(obs_buf)):
             raise ValueError(f"Observation out of bounds for {obs_space}")
@@ -1021,6 +1035,8 @@ class MFG_Musculoskeletal_V11(MuJoCoEnv):
         
         if seed is not None:
             self._seed(seed)
+        if self.speed_command is not None:
+            self.speed_command.reset(self.np_random)
         
         self.ref_traj.reset(
             seed=seed,
@@ -1048,6 +1064,9 @@ class MFG_Musculoskeletal_V11(MuJoCoEnv):
         self._prewarm_pelvis_local_caches_from_init()
         
         obs, info = super().reset(options=options)
+        if self.speed_command is not None:
+            # Fix the command frame for the whole episode.
+            self.speed_command_direction = self.pelvis_heading.copy()
 
         if self._jerk_prev1.size:
             self._jerk_prev1.fill(0.0)
@@ -1157,6 +1176,8 @@ class MFG_Musculoskeletal_V11(MuJoCoEnv):
         self.ref_traj.next()
         self.step_count += 1
         sim_time = self.step_count * self.opt_time * self.frame_skip
+        if self.speed_command is not None:
+            self.speed_command.update(sim_time)
         
         clip_stats = None
         if self._do_clip_action:
