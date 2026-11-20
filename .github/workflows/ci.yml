@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      MUJOCO_GL: egl        # 无显示器环境，防止 MuJoCo 尝试打开窗口
+      MUJOCO_GL: disable    # 测试不渲染画面；CI 服务器没有 EGL/显卡驱动，关闭 OpenGL 后端
     steps:
       - uses: actions/checkout@v4
 
