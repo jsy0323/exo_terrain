@@ -44,3 +44,6 @@ events.out.tfevents.*
 .DS_Store
 ._*
 Thumbs.db
+
+# Jenkins 测试报告
+/reports/
