@@ -102,4 +102,4 @@ train:
 seed: 0
 device: cuda
 log_dir: logs/humanoid_walk_run
-resume_path: logs\humanoid_walk_run\model_best.pt
+resume_path: logs/humanoid_walk_run/model_best.pt

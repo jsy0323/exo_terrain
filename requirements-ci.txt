@@ -1,0 +1,24 @@
+# CI 用的精简依赖：只装跑 tests/ 需要的包（不含 rospkg、ipython 等本地开发工具）
+# torch 在 workflow 里单独从 CPU 源安装，避免下载几 GB 的 CUDA 版本
+mujoco==3.3.2
+gymnasium==1.1.1
+numpy
+# scipy 1.16 重写了 SLSQP，export_assistance_curve 的 quiet-phase 拟合会失败，先固定在 1.15
+scipy>=1.14,<1.16
+pyyaml
+omegaconf
+hydra-core
+stable-baselines3
+rsl-rl-lib
+pandas
+matplotlib
+einops
+pyquaternion
+numpy-quaternion
+numba
+h5py
+opencv-python-headless
+packaging
+wandb
+tensorboard
+pytest

@@ -8,7 +8,7 @@
 
 # --------------------------------------
 
-model_path: Env\MFG_Musculoskelet_V11\MFG_Raj2015_V11_randomterrainexo.xml
+model_path: Env/MFG_Musculoskelet_V11/MFG_Raj2015_V11_randomterrainexo.xml
 default_frame_skip: 20
 
 # (Optional) override XML integrator timestep (seconds)

@@ -22,6 +22,11 @@ from force_estimation.preprocessing import CausalLowPass, GravityAHRS
 from force_estimation.experiments import SimulationConditions
 from visualize import PolicyVisualizer
 
+# 训练好的策略权重在 .gitignore 里，CI 上没有这个文件，用到它的测试自动跳过
+POLICY_CHECKPOINT = Path("logs/humanoid_walk_run/model_best.pt")
+requires_policy_checkpoint = unittest.skipUnless(
+    POLICY_CHECKPOINT.exists(), f"需要本地训练好的策略权重 {POLICY_CHECKPOINT}")
+
 
 class EstimatorTests(unittest.TestCase):
     def test_resume_matches_uninterrupted_training(self):
@@ -190,6 +195,7 @@ class EstimatorTests(unittest.TestCase):
 
 
 class SensorPhysicsTests(unittest.TestCase):
+    @requires_policy_checkpoint
     def test_simulation_ahrs_filtering_and_known_torque_balance(self):
         with open("configs/force_estimation_sim.yaml", encoding="utf-8") as handle:
             config = yaml.safe_load(handle)
@@ -228,6 +234,7 @@ class SensorPhysicsTests(unittest.TestCase):
             np.testing.assert_array_equal(env.model.body_mass, original_mass)
             visualizer.env.close()
 
+    @requires_policy_checkpoint
     def test_actual_policy_sensor_sites_timing_and_inverse_dynamics(self):
         with open("configs/force_estimation.yaml", encoding="utf-8") as handle:
             config = yaml.safe_load(handle)
